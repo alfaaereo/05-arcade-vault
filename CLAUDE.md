@@ -10,15 +10,6 @@ Arcade Vault: an online platform for playing retro-style games and competing for
 
 Development follows Spec Driven Design using the `/spec` and `/spec-impl` skills from [Klerith/fernando-skills](https://github.com/Klerith/fernando-skills) (install with `npx skills@latest add Klerith/fernando-skills`).
 
-## Commands
-
-```bash
-npm run dev     # dev server (Turbopack) on http://localhost:3000
-npm run build   # production build (also runs type checking)
-npm run start   # serve the production build
-npm run lint    # ESLint (flat config, eslint-config-next core-web-vitals + typescript)
-npx tsc --noEmit  # type-check only
-```
 
 There is no test framework set up yet.
 
@@ -29,6 +20,9 @@ There is no test framework set up yet.
 - Tailwind CSS v4 runs through the `@tailwindcss/turbopack` loader set in `next.config.ts` (`turbopack.rules`), not PostCSS. Theme tokens live in `app/globals.css` via `@theme inline`.
 - Typed route helpers such as `LayoutProps<"/">` are global types generated into `.next/types` by `next dev`/`next build`.
 - The path alias `@/*` maps to the repo root.
+
+##Skills
+Usa siempre /frontend-design para diseñar la interfaz de usuario.
 
 ## Design reference (`resources/`)
 
