@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { MobileMenu } from "@/components/mobile-menu";
 import { NavLinks, NavLinksFallback } from "@/components/nav-links";
 
 export function Nav() {
@@ -16,9 +17,14 @@ export function Nav() {
         <NavLinks />
       </Suspense>
       <div className="spacer"></div>
+      <div className="coin-counter">
+        <span className="coin"></span>
+        <span>CRÉDITOS · 03</span>
+      </div>
       <Link href="/login" className="btn auth-btn">
         Iniciar Sesión
       </Link>
+      <MobileMenu />
     </nav>
   );
 }
