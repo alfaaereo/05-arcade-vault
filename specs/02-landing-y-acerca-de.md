@@ -110,32 +110,32 @@ Antes de crear rutas nuevas, consultar `node_modules/next/dist/docs/` para pági
 
 ## Criterios de aceptación
 
-- [ ] `next build` termina sin errores ni advertencias de TypeScript.
-- [ ] La consola del navegador no muestra errores ni advertencias de hidratación en `/`, `/games` ni `/about`.
-- [ ] `/` muestra el título "EL ARCADE / CLÁSICO ESTÁ / DE VUELTA" y las 8 siluetas animadas.
-- [ ] "▶ EXPLORAR JUEGOS", "VER TODOS LOS JUEGOS →" e "INSERTAR MONEDA →" navegan a `/games`.
-- [ ] "✦ CREAR CUENTA" y "EMPEZAR GRATIS →" navegan a `/login`.
-- [ ] El mini-rail muestra los 6 primeros juegos de `GAMES` en orden, y pulsar uno navega a `/juegos/<id>`.
-- [ ] "VER SALÓN →" navega a `/salon`.
-- [ ] La fila de NEONFOX en "ÚLTIMAS PUNTUACIONES" muestra "+184.220".
-- [ ] El primer puesto de "TOP JUGADORES · HOY" muestra "312.840" con la barra al 100%.
-- [ ] Las secciones `.reveal` aparecen con fundido al entrar en pantalla.
-- [ ] Con `prefers-reduced-motion: reduce` emulado, todas las secciones son visibles sin transición.
-- [ ] Con JavaScript desactivado, todas las secciones de `/` y `/about` son visibles.
-- [ ] `/games` muestra la Biblioteca de SPEC 01 con el hero "ARCADE VAULT", las 8 cards, la búsqueda y los chips.
-- [ ] El nav muestra en orden "Inicio", "Biblioteca", "Salón de la Fama", "Acerca de", también en el menú móvil.
-- [ ] "Inicio" está activo solo en `/`. "Biblioteca" está activa en `/games`, `/juegos/<id>` y `/juegos/<id>/jugar`. "Acerca de" está activo en `/about`.
-- [ ] El logo del nav lleva a `/`.
-- [ ] "VOLVER AL VAULT" en Detalle y en el modal del Reproductor lleva a `/games`.
-- [ ] "VOLVER A LA BIBLIOTECA" en el Salón lleva a `/games`.
-- [ ] Enviar el login o pulsar "JUGAR COMO INVITADO" navega a `/games`.
-- [ ] El botón de la 404 lleva a `/`.
-- [ ] `/about` muestra "ACERCA DE ARCADE VAULT", 3 highlights, el divisor de píxeles y el formulario de contacto.
-- [ ] Enviar el formulario con algún campo vacío o solo con espacios lo hace temblar y no muestra la terminal.
-- [ ] Enviar con los 3 campos completos y nombre "px_kai" muestra la terminal con "GRACIAS, PX_KAI.".
-- [ ] El envío del formulario no hace ninguna petición de red ni escribe en `localStorage`.
-- [ ] "ENVIAR OTRO MENSAJE" vuelve al formulario con los campos vacíos.
-- [ ] Comparadas lado a lado con `references/templates/home-about/arcade-vault-standalone.html` a 1280px, `/` y `/about` coinciden en colores, fuentes, espaciado y animaciones.
+- [x] `next build` termina sin errores ni advertencias de TypeScript.
+- [x] La consola del navegador no muestra errores ni advertencias de hidratación en `/`, `/games` ni `/about`.
+- [x] `/` muestra el título "EL ARCADE / CLÁSICO ESTÁ / DE VUELTA" y las 8 siluetas animadas.
+- [x] "▶ EXPLORAR JUEGOS", "VER TODOS LOS JUEGOS →" e "INSERTAR MONEDA →" navegan a `/games`.
+- [x] "✦ CREAR CUENTA" y "EMPEZAR GRATIS →" navegan a `/login`.
+- [x] El mini-rail muestra los 6 primeros juegos de `GAMES` en orden, y pulsar uno navega a `/juegos/<id>`.
+- [x] "VER SALÓN →" navega a `/salon`.
+- [x] La fila de NEONFOX en "ÚLTIMAS PUNTUACIONES" muestra "+184.220".
+- [x] El primer puesto de "TOP JUGADORES · HOY" muestra "312.840" con la barra al 100%.
+- [x] Las secciones `.reveal` aparecen con fundido al entrar en pantalla.
+- [x] Con `prefers-reduced-motion: reduce` emulado, todas las secciones son visibles sin transición.
+- [x] Con JavaScript desactivado, todas las secciones de `/` y `/about` son visibles.
+- [x] `/games` muestra la Biblioteca de SPEC 01 con el hero "ARCADE VAULT", las 8 cards, la búsqueda y los chips.
+- [x] El nav muestra en orden "Inicio", "Biblioteca", "Salón de la Fama", "Acerca de", también en el menú móvil.
+- [x] "Inicio" está activo solo en `/`. "Biblioteca" está activa en `/games`, `/juegos/<id>` y `/juegos/<id>/jugar`. "Acerca de" está activo en `/about`.
+- [x] El logo del nav lleva a `/`.
+- [x] "VOLVER AL VAULT" en Detalle y en el modal del Reproductor lleva a `/games`.
+- [x] "VOLVER A LA BIBLIOTECA" en el Salón lleva a `/games`.
+- [x] Enviar el login o pulsar "JUGAR COMO INVITADO" navega a `/games`.
+- [x] El botón de la 404 lleva a `/`.
+- [x] `/about` muestra "ACERCA DE ARCADE VAULT", 3 highlights, el divisor de píxeles y el formulario de contacto.
+- [x] Enviar el formulario con algún campo vacío o solo con espacios lo hace temblar y no muestra la terminal.
+- [x] Enviar con los 3 campos completos y nombre "px_kai" muestra la terminal con "GRACIAS, PX_KAI.".
+- [x] El envío del formulario no hace ninguna petición de red ni escribe en `localStorage`.
+- [x] "ENVIAR OTRO MENSAJE" vuelve al formulario con los campos vacíos.
+- [x] Comparadas lado a lado con `references/templates/home-about/arcade-vault-standalone.html` a 1280px, `/` y `/about` coinciden en colores, fuentes, espaciado y animaciones.
 
 ## Decisiones
 
