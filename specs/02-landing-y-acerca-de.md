@@ -1,6 +1,6 @@
 # SPEC 02 — Landing page y Acerca de
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 01
 > **Fecha:** 2026-10-15
 > **Objetivo:** Convertir `/` en la landing del prototipo `references/templates/home-about/`, mover la Biblioteca a `/games` y añadir la página `/about` con formulario de contacto visual, más los enlaces "Inicio" y "Acerca de" en el nav.
