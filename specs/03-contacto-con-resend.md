@@ -86,20 +86,20 @@ Antes de empezar, leer `node_modules/next/dist/docs/01-app/02-guides/forms.md`, 
 
 ## Criterios de aceptación
 
-- [ ] `next build` termina sin errores ni advertencias de TypeScript.
-- [ ] `/about` sigue siendo idéntica a la plantilla a 1280px antes de enviar.
-- [ ] La consola del navegador no muestra errores ni advertencias de hidratación en `/about`.
-- [ ] Enviar con algún campo vacío o solo con espacios hace temblar el formulario y no hace ninguna petición de red.
-- [ ] Mientras se envía, el botón muestra "ENVIANDO…" y está deshabilitado.
-- [ ] Con `.env.local` válido, enviar nombre "px_kai", un correo y un mensaje muestra "GRACIAS, PX_KAI." y llega un correo a `alfaaereo@gmail.com` con asunto "[Arcade Vault] Mensaje de px_kai".
-- [ ] Pulsar "Responder" en ese correo dirige la respuesta al correo escrito en el formulario.
-- [ ] Un mensaje que contiene `<b>hola</b>` aparece en el correo como texto literal, no en negrita.
-- [ ] Los saltos de línea del mensaje se conservan en el correo.
-- [ ] Sin `RESEND_API_KEY` (o con una clave inválida), se muestra la terminal de error y el servidor registra el error en consola.
-- [ ] "REINTENTAR" vuelve al formulario con los tres campos conservados.
-- [ ] "ENVIAR OTRO MENSAJE" vuelve al formulario con los campos vacíos.
-- [ ] `RESEND_API_KEY` no aparece en el bundle del cliente ni en ninguna respuesta de red.
-- [ ] `.env.template` está versionado y `.env.local` no aparece en `git status`.
+- [x] `next build` termina sin errores ni advertencias de TypeScript.
+- [x] `/about` sigue siendo idéntica a la plantilla a 1280px antes de enviar.
+- [x] La consola del navegador no muestra errores ni advertencias de hidratación en `/about`.
+- [x] Enviar con algún campo vacío o solo con espacios hace temblar el formulario y no hace ninguna petición de red.
+- [x] Mientras se envía, el botón muestra "ENVIANDO…" y está deshabilitado.
+- [x] Con `.env.local` válido, enviar nombre "px_kai", un correo y un mensaje muestra "GRACIAS, PX_KAI." y llega un correo a `alfaaereo@gmail.com` con asunto "[Arcade Vault] Mensaje de px_kai".
+- [x] Pulsar "Responder" en ese correo dirige la respuesta al correo escrito en el formulario.
+- [x] Un mensaje que contiene `<b>hola</b>` aparece en el correo como texto literal, no en negrita.
+- [x] Los saltos de línea del mensaje se conservan en el correo.
+- [x] Sin `RESEND_API_KEY` (o con una clave inválida), se muestra la terminal de error y el servidor registra el error en consola.
+- [x] "REINTENTAR" vuelve al formulario con los tres campos conservados.
+- [x] "ENVIAR OTRO MENSAJE" vuelve al formulario con los campos vacíos.
+- [x] `RESEND_API_KEY` no aparece en el bundle del cliente ni en ninguna respuesta de red.
+- [x] `.env.template` está versionado y `.env.local` no aparece en `git status`.
 
 ## Decisiones
 
