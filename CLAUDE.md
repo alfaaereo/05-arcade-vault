@@ -33,10 +33,12 @@ Usa siempre /frontend-design para diseñar la interfaz de usuario.
 - `app.jsx` does hash-based routing and stores the user and scores in `localStorage` (`av_user`, `av_scores`). These are prototype stand-ins, not the target architecture.
 - `styles.css` defines the retro neon theme: CSS variables (`--bg`, `--cyan`, `--magenta`, `--yellow`, …), the "Press Start 2P" and "JetBrains Mono" fonts, and the `av-*` / `cover-*` classes. Port these tokens into the Tailwind theme instead of copying the raw CSS.
 
-## App structure (SPEC 01)
+## App structure (SPEC 01, SPEC 02)
 
-- Routes: `/` (library), `/juegos/[id]` (detail), `/juegos/[id]/jugar` (player), `/login`, `/salon` (hall of fame), plus `app/not-found.tsx`. Game routes are pre-generated with `generateStaticParams`; unknown ids call `notFound()`.
-- Mock data lives in `lib/games.ts` (`GAMES`, `CATEGORIES`, `getGame`, `seededScores`, `formatScore`). Always format visible numbers with `formatScore` to avoid hydration mismatches.
+- Routes: `/` (landing), `/games` (library), `/about` (about + visual-only contact form), `/juegos/[id]` (detail), `/juegos/[id]/jugar` (player), `/login`, `/salon` (hall of fame), plus `app/not-found.tsx`. Game routes are pre-generated with `generateStaticParams`; unknown ids call `notFound()`.
+- Mock data lives in `lib/games.ts` (`GAMES`, `CATEGORIES`, `getGame`, `seededScores`, `formatScore`). Fixed landing copy (features, stats, activity, pricing, FAQ) lives in `lib/home.ts`. Always format visible numbers with `formatScore` to avoid hydration mismatches.
 - Shared components live in `components/`. `Nav` wraps `NavLinks` (`usePathname`) in `<Suspense>` because, with Cache Components, `usePathname` suspends on non-pre-generated params.
+- Nav links come from `LINKS` in `components/nav-links.tsx` (shared with `MobileMenu`). "Back" links in the game flow point to `/games`; the logo and the 404 point to `/`.
+- Scroll-in sections use the `.reveal` class plus `<RevealObserver />` mounted inside each page. Hidden state only applies once it adds `.reveal-ready` to `<html>`, so content stays visible without JS and with `prefers-reduced-motion`.
 - Styling reuses the ported `av-*` classes from `app/globals.css`; one-off styles use Tailwind utilities with the theme tokens (`text-ink-faint`, `font-pixel`, …). `style` is only for dynamic values.
 - Visual-only MVP: no session, no score persistence, no real games.

@@ -4,8 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export const LINKS = [
-  { href: "/", label: "Biblioteca", isActive: (p: string) => p === "/" || p.startsWith("/juegos/") },
+  { href: "/", label: "Inicio", isActive: (p: string) => p === "/" },
+  { href: "/games", label: "Biblioteca", isActive: (p: string) => p === "/games" || p.startsWith("/juegos/") },
   { href: "/salon", label: "Salón de la Fama", isActive: (p: string) => p === "/salon" },
+  { href: "/about", label: "Acerca de", isActive: (p: string) => p === "/about" },
 ];
 
 function Links({ pathname }: { pathname: string | null }) {
