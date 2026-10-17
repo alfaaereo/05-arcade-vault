@@ -42,3 +42,9 @@ Usa siempre /frontend-design para diseñar la interfaz de usuario.
 - Scroll-in sections use the `.reveal` class plus `<RevealObserver />` mounted inside each page. Hidden state only applies once it adds `.reveal-ready` to `<html>`, so content stays visible without JS and with `prefers-reduced-motion`.
 - Styling reuses the ported `av-*` classes from `app/globals.css`; one-off styles use Tailwind utilities with the theme tokens (`text-ink-faint`, `font-pixel`, …). `style` is only for dynamic values.
 - Visual-only MVP: no session, no score persistence, no real games.
+
+## Contact form (SPEC 03)
+
+- The `/about` contact form sends a real email with Resend through the Server Action `sendContact` in `app/about/actions.ts`. `components/contact-form.tsx` calls it with `useActionState` and shows idle, pending ("ENVIANDO…"), success and error ("REINTENTAR") states. The error terminal uses the `.terminal-success.is-error` modifier.
+- The email body comes from `buildContactEmail` in `lib/contact-email.ts`, which escapes user values in the HTML.
+- Server-only env vars in `.env.local` (template in `.env.example`, the only versioned `.env*` file): `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`. `onboarding@resend.dev` as sender only delivers to the Resend account owner. Missing vars make the action return `{ status: "error" }` and log with `console.error`; it never throws.
