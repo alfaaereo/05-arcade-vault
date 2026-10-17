@@ -1314,4 +1314,11 @@
   .term-body .dim { color: var(--ink-dim); }
   .term-body .success { margin-top: 12px; color: var(--green); text-shadow: 0 0 6px rgba(0,255,136,0.45); font-weight: 700; white-space: pre-wrap; }
   .term-body .caret { animation: blink 1s steps(1) infinite; }
+
+  .terminal-success.is-error { border-color: var(--magenta); box-shadow: 0 0 22px rgba(255,0,110,0.25); }
+  .term-body .err { color: var(--magenta); }
+  .term-body .failure { margin-top: 12px; color: var(--magenta); text-shadow: 0 0 6px rgba(255,0,110,0.5); font-weight: 700; white-space: pre-wrap; }
+
+  .contact-form[aria-busy="true"] input, .contact-form[aria-busy="true"] textarea { color: var(--ink-dim); cursor: progress; }
+  .contact-form .btn:disabled { cursor: progress; opacity: 0.6; box-shadow: none; color: var(--ink-dim); }
 }
