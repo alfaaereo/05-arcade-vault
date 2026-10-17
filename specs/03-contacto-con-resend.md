@@ -1,6 +1,6 @@
 # SPEC 03 — Envío del formulario de contacto con Resend
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 02
 > **Fecha:** 2026-10-16
 > **Objetivo:** Hacer que el formulario de contacto de `/about` envíe un correo real con Resend a la dirección configurada en `CONTACT_TO_EMAIL`, manteniendo intacto el diseño de la plantilla.
