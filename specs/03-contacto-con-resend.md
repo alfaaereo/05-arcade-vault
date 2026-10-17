@@ -27,7 +27,7 @@ SPEC 02 portó `/about` desde `references/templates/home-about/about.jsx` con un
   - Error: una terminal VAULT-OS con la misma estética, líneas `[OK] Conectando con servidor…` y `[ERR] No se pudo transmitir el paquete.`, y el mensaje "> ERROR AL ENVIAR. INTÉNTALO DE NUEVO." en rojo. El botón "REINTENTAR" vuelve al formulario con los campos conservados.
   - "ENVIAR OTRO MENSAJE" sigue limpiando el formulario.
 - Variables de entorno `RESEND_API_KEY`, `CONTACT_TO_EMAIL` (valor: `alfaaereo@gmail.com`) y `CONTACT_FROM_EMAIL`, leídas solo en el servidor (sin prefijo `NEXT_PUBLIC_`).
-- `.env.example` versionado con las tres claves y la API key vacía. La API key real solo vive en `.env.local`, que ya ignora la regla `.env*` de `.gitignore`.
+- `.env.template` versionado con las tres claves y la API key vacía. La API key real solo vive en `.env.local`, que ya ignora la regla `.env*` de `.gitignore`.
 - Si falta alguna variable, la acción no lanza una excepción: devuelve un error, registra `console.error` en el servidor y el usuario ve la terminal de error.
 - Estilos para la variante de error como modificador `.terminal-success.is-error` (borde, `box-shadow` y `text-shadow` en `--magenta`; el tema no tiene `--red`) en `app/globals.css`, junto a las reglas `.term-*` existentes.
 - Actualizar `CLAUDE.md`: el formulario de contacto ya envía correo, más las variables de entorno necesarias.
@@ -60,7 +60,7 @@ export function buildContactEmail(m: ContactMessage): { subject: string; html: s
 ```
 
 ```bash
-# .env.example
+# .env.template
 RESEND_API_KEY=
 CONTACT_TO_EMAIL=alfaaereo@gmail.com
 CONTACT_FROM_EMAIL=onboarding@resend.dev
@@ -77,7 +77,7 @@ Convenciones:
 
 Antes de empezar, leer `node_modules/next/dist/docs/01-app/02-guides/forms.md`, `server-actions.md` y `environment-variables.md`. Usar `/frontend-design` para los estados pendiente y error, como indica `CLAUDE.md`.
 
-1. `npm install resend`. Crear `.env.example` con las tres claves. Verificación: `next build` compila.
+1. `npm install resend`. Crear `.env.template` con las tres claves. Verificación: `next build` compila.
 2. Crear `lib/contact-email.ts` con `buildContactEmail` (asunto, HTML escapado y texto). Verificación: `next build` compila.
 3. Crear `app/about/actions.ts` con `ContactState` y `sendContact`: lee y recorta los campos, devuelve `invalid` si falta alguno, devuelve `error` si falta alguna variable de entorno y, si no, llama a `resend.emails.send({ from, to, replyTo, subject, html, text })`. Devuelve `sent` solo si la respuesta no trae `error`. Verificación: `next build` compila.
 4. Conectar `components/contact-form.tsx` a la acción con `useActionState`: añadir `name` a los inputs, mantener la validación previa con temblor (y temblar también si el servidor devuelve `invalid`), mostrar "ENVIANDO…" con el botón deshabilitado y los campos `readOnly` mientras está pendiente, y mostrar la terminal de éxito cuando el estado es `sent`. Verificación: con `.env.local` válido, enviar el formulario hace llegar el correo a `alfaaereo@gmail.com`.
@@ -99,7 +99,7 @@ Antes de empezar, leer `node_modules/next/dist/docs/01-app/02-guides/forms.md`, 
 - [ ] "REINTENTAR" vuelve al formulario con los tres campos conservados.
 - [ ] "ENVIAR OTRO MENSAJE" vuelve al formulario con los campos vacíos.
 - [ ] `RESEND_API_KEY` no aparece en el bundle del cliente ni en ninguna respuesta de red.
-- [ ] `.env.example` está versionado y `.env.local` no aparece en `git status`.
+- [ ] `.env.template` está versionado y `.env.local` no aparece en `git status`.
 
 ## Decisiones
 
@@ -126,7 +126,7 @@ Antes de empezar, leer `node_modules/next/dist/docs/01-app/02-guides/forms.md`, 
 
 | Riesgo | Mitigación |
 | --- | --- |
-| La API key se filtra al repo o al cliente. | `.env*` ya está ignorado, solo `.env.example` se versiona con la clave vacía, no se usa el prefijo `NEXT_PUBLIC_` y la clave solo se lee dentro de `actions.ts`. Hay un criterio de aceptación que lo comprueba. |
+| La API key se filtra al repo o al cliente. | `.env*` ya está ignorado, solo `.env.template` se versiona con la clave vacía, no se usa el prefijo `NEXT_PUBLIC_` y la clave solo se lee dentro de `actions.ts`. Hay un criterio de aceptación que lo comprueba. |
 | `onboarding@resend.dev` solo entrega al dueño de la cuenta: si la cuenta de Resend no es `alfaaereo@gmail.com`, Resend rechaza el envío. | La acción devuelve `error` y registra el mensaje de Resend en el servidor. El destinatario debe ser el correo de la cuenta de Resend, o hay que verificar un dominio y cambiar `CONTACT_FROM_EMAIL`. |
 | Spam o abuso sin antispam: llenan el buzón o gastan la cuota de Resend. | Solo se envía al equipo (sin acuse), así que no se puede usar para mandar correos a terceros. El antispam queda como spec futuro. |
 | Inyección de HTML en el correo. | `buildContactEmail` escapa los valores. Hay un criterio con `<b>hola</b>`. |
