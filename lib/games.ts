@@ -1,9 +1,7 @@
 // Datos simulados del catálogo. Portado desde references/templates/data.jsx.
-
 export type GameCategory = "ARCADE" | "PUZZLE" | "SHOOTER" | "VERSUS";
 export type CategoryFilter = "TODOS" | GameCategory;
 export type GameColor = "cyan" | "magenta" | "yellow" | "green";
-
 export type Game = {
   id: string;
   title: string;
@@ -14,15 +12,15 @@ export type Game = {
   color: GameColor;
   best: number;
   plays: string;
+  // URL del juego embebible en public/. Sin src, el reproductor simula la partida.
+  src?: string;
 };
-
 export type ScoreRow = {
   rank: number;
   name: string;
   score: number;
   date: string;
 };
-
 export const GAMES: Game[] = [
   {
     id: "bloque-buster",
@@ -112,20 +110,49 @@ export const GAMES: Game[] = [
     best: 24,
     plays: "4.2K",
   },
+  {
+    id: "asteroids",
+    title: "ASTEROIDS",
+    short: "Rota, propulsa y dispara en un campo de rocas.",
+    long: "Tu nave vectorial flota en un espacio sin bordes: lo que sale por un lado entra por el otro. Dispara para partir las rocas grandes en medianas y las medianas en pequeñas. Recoge el power-up 3x para disparar en abanico durante 5 segundos. Tienes tres vidas.",
+    cat: "SHOOTER",
+    cover: "cover-rocas",
+    color: "cyan",
+    best: 0,
+    plays: "0",
+    src: "/games/asteroids/index.html",
+  },
 ];
-
-export const CATEGORIES: CategoryFilter[] = ["TODOS", "ARCADE", "PUZZLE", "SHOOTER", "VERSUS"];
-
+export const CATEGORIES: CategoryFilter[] = [
+  "TODOS",
+  "ARCADE",
+  "PUZZLE",
+  "SHOOTER",
+  "VERSUS",
+];
 export const PLAYERS = [
-  "PX_KAI", "NEONFOX", "Z3R0COOL", "M00NRYU", "VAULT_07", "GLITCHA",
-  "ATARI_KID", "CYBER_LU", "MAGENTA88", "SCANLINE", "BIT_LORD", "ARKADYA",
-  "DROID_X", "RGB_QUEEN", "PIXEL_DAD", "RETROVIRA", "VECTORX", "JOY_STK",
+  "PX_KAI",
+  "NEONFOX",
+  "Z3R0COOL",
+  "M00NRYU",
+  "VAULT_07",
+  "GLITCHA",
+  "ATARI_KID",
+  "CYBER_LU",
+  "MAGENTA88",
+  "SCANLINE",
+  "BIT_LORD",
+  "ARKADYA",
+  "DROID_X",
+  "RGB_QUEEN",
+  "PIXEL_DAD",
+  "RETROVIRA",
+  "VECTORX",
+  "JOY_STK",
 ];
-
 export function getGame(id: string): Game | undefined {
   return GAMES.find((g) => g.id === id);
 }
-
 // Generador determinista: la misma semilla produce las mismas filas en servidor y cliente.
 export function seededScores(seed: number, count = 12): ScoreRow[] {
   let s = seed;
@@ -142,13 +169,18 @@ export function seededScores(seed: number, count = 12): ScoreRow[] {
     const score = base - i * Math.floor(2000 + rand() * 4000);
     const day = String(1 + Math.floor(rand() * 28)).padStart(2, "0");
     const mon = String(1 + Math.floor(rand() * 12)).padStart(2, "0");
-    rows.push({ rank: i + 1, name, score: Math.max(score, 1000), date: `${day}/${mon}/2026` });
+    rows.push({
+      rank: i + 1,
+      name,
+      score: Math.max(score, 1000),
+      date: `${day}/${mon}/2026`,
+    });
   }
-  return rows.sort((a, b) => b.score - a.score).map((r, i) => ({ ...r, rank: i + 1 }));
+  return rows
+    .sort((a, b) => b.score - a.score)
+    .map((r, i) => ({ ...r, rank: i + 1 }));
 }
-
 const scoreFormat = new Intl.NumberFormat("es-ES");
-
 export function formatScore(n: number): string {
   return scoreFormat.format(n);
 }
