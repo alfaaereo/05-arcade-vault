@@ -10,7 +10,6 @@ Arcade Vault: an online platform for playing retro-style games and competing for
 
 Development follows Spec Driven Design using the `/spec` and `/spec-impl` skills from [Klerith/fernando-skills](https://github.com/Klerith/fernando-skills) (install with `npx skills@latest add Klerith/fernando-skills`).
 
-
 There is no test framework set up yet.
 
 ## Stack and configuration
@@ -48,3 +47,12 @@ Usa siempre /frontend-design para diseñar la interfaz de usuario.
 - The `/about` contact form sends a real email with Resend through the Server Action `sendContact` in `app/about/actions.ts`. `components/contact-form.tsx` calls it with `useActionState` and shows idle, pending ("ENVIANDO…"), success and error ("REINTENTAR") states. The error terminal uses the `.terminal-success.is-error` modifier.
 - The email body comes from `buildContactEmail` in `lib/contact-email.ts`, which escapes user values in the HTML.
 - Server-only env vars in `.env.local` (template in `.env.template`, the only versioned `.env*` file; Next does not load it, copy it to `.env.local`): `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`. `onboarding@resend.dev` as sender only delivers to the Resend account owner. Missing vars make the action return `{ status: "error" }` and log with `console.error`; it never throws.
+
+## Supabase (SPEC 04)
+
+- Integration via `@supabase/ssr` + `@supabase/supabase-js`. No tables, auth or UI use yet.
+- `lib/supabase/client.ts` → `createClient()` for Client Components. `lib/supabase/server.ts` → `await createClient()` for Server Components, Server Actions and Route Handlers (create per request; reading `cookies()` makes the route dynamic, so wrap it in `<Suspense>`).
+- `proxy.ts` (root, Next 16 replacement for `middleware.ts`) calls `updateSession` from `lib/supabase/proxy.ts`, which refreshes the session cookies with `getClaims()`. It never redirects, and on failure it logs and lets the request through.
+- Env vars in `.env.local`: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_…`), read through `getSupabaseEnv` in `lib/supabase/env.ts`. Never use the secret/`service_role` key.
+- `lib/supabase/database.types.ts` is generated (MCP `generate_typescript_types`). Regenerate it after every schema change.
+- `npm run supabase:check` checks the connection (`SUPABASE OK` / exit 1).
