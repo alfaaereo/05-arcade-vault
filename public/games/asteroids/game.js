@@ -16,6 +16,12 @@ window.addEventListener("keydown", (e) => {
 window.addEventListener("keyup", (e) => {
   keys[e.code] = false;
 });
+// Si el foco sale del juego (p. ej. clic en PAUSA de la plataforma) se pierde el keyup.
+function clearKeys() {
+  for (const k in keys) keys[k] = false;
+  for (const k in justPressed) justPressed[k] = false;
+}
+window.addEventListener("blur", clearKeys);
 function pressed(code) {
   const val = justPressed[code];
   justPressed[code] = false;
@@ -267,6 +273,37 @@ let state; // 'playing' | 'dead' | 'gameover'
 let deadTimer;
 let powerUpSpawned;
 let killsSinceSpawn;
+// ── Modo embebido (iframe de Arcade Vault) ────────────────────────────────────
+// Protocolo postMessage con la plataforma: recibe av:pause | av:resume |
+// av:restart | av:end y envía av:gameover con la puntuación.
+const EMBEDDED = window.parent !== window;
+let paused = false;
+let gameOverSent = false;
+function endGame() {
+  state = "gameover";
+  if (EMBEDDED && !gameOverSent) {
+    gameOverSent = true;
+    window.parent.postMessage({ type: "av:gameover", score }, location.origin);
+  }
+}
+window.addEventListener("message", (e) => {
+  if (!EMBEDDED || e.source !== window.parent || e.origin !== location.origin)
+    return;
+  const type = e.data && e.data.type;
+  if (type === "av:pause") {
+    paused = true;
+  } else if (type === "av:resume") {
+    paused = false;
+    lastTime = null;
+    clearKeys();
+  } else if (type === "av:restart") {
+    initGame();
+    lastTime = null;
+    clearKeys();
+  } else if (type === "av:end") {
+    if (state !== "gameover") endGame();
+  }
+});
 function spawnAsteroids(count) {
   const SAFE_DIST = 130;
   for (let i = 0; i < count; i++) {
@@ -290,6 +327,8 @@ function initGame() {
   lives = 3;
   level = 1;
   state = "playing";
+  paused = false;
+  gameOverSent = false;
   spawnAsteroids(4);
 }
 function nextLevel() {
@@ -310,7 +349,7 @@ function killShip() {
   ship.dead = true;
   lives--;
   if (lives <= 0) {
-    state = "gameover";
+    endGame();
   } else {
     state = "dead";
     deadTimer = 2;
@@ -319,7 +358,8 @@ function killShip() {
 // ── Update ────────────────────────────────────────────────────────────────────
 function update(dt) {
   if (state === "gameover") {
-    if (pressed("Space")) initGame();
+    // Embebido, el reinicio lo decide la plataforma (av:restart).
+    if (pressed("Space") && !EMBEDDED) initGame();
     particles.forEach((p) => p.update(dt));
     particles = particles.filter((p) => !p.dead);
     return;
@@ -437,7 +477,7 @@ function draw() {
   bullets.forEach((b) => b.draw());
   ship.draw();
   drawHUD();
-  if (state === "gameover")
+  if (state === "gameover" && !EMBEDDED)
     drawOverlay("GAME OVER", `PUNTAJE: ${score}   —   ESPACIO PARA REINICIAR`);
 }
 // ── Loop principal ────────────────────────────────────────────────────────────
@@ -445,7 +485,7 @@ let lastTime = null;
 function loop(ts) {
   const dt = lastTime === null ? 0 : Math.min((ts - lastTime) / 1000, 0.05);
   lastTime = ts;
-  update(dt);
+  if (!paused) update(dt);
   draw();
   requestAnimationFrame(loop);
 }
