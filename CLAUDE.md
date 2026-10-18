@@ -55,4 +55,3 @@ Usa siempre /frontend-design para diseñar la interfaz de usuario.
 - `proxy.ts` (root, Next 16 replacement for `middleware.ts`) calls `updateSession` from `lib/supabase/proxy.ts`, which refreshes the session cookies with `getClaims()`. It never redirects, and on failure it logs and lets the request through.
 - Env vars in `.env.local`: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_…`), read through `getSupabaseEnv` in `lib/supabase/env.ts`. Never use the secret/`service_role` key.
 - `lib/supabase/database.types.ts` is generated (MCP `generate_typescript_types`). Regenerate it after every schema change.
-- `npm run supabase:check` checks the connection (`SUPABASE OK` / exit 1).

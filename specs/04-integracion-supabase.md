@@ -21,8 +21,7 @@ La app es un MVP visual sin persistencia (SPEC 01). La autenticación, las puntu
 - `proxy.ts` en la raíz (convención de Next 16, que sustituye a `middleware.ts`): exporta `proxy(request)`, que delega en `updateSession`, con un `matcher` que excluye `_next/static`, `_next/image`, `favicon.ico` e imágenes.
 - `lib/supabase/env.ts`: lee y valida las dos variables. Si falta alguna, lanza un error con un mensaje claro (nombre de la variable, nunca su valor).
 - `lib/supabase/database.types.ts`: tipos generados del esquema `public` (vacío por ahora) y pasados como genérico `Database` a los clientes.
-- Script `npm run supabase:check` (`scripts/supabase-check.mjs`, ejecutado con `node --env-file=.env.local`). Llama a `GET {URL}/auth/v1/health` con la cabecera `apikey`, imprime `SUPABASE OK` y sale con código 0, o imprime el error y sale con código 1.
-- Actualizar `CLAUDE.md` con una sección "Supabase (SPEC 04)": clientes, variables y script.
+- Actualizar `CLAUDE.md` con una sección "Supabase (SPEC 04)": clientes y variables.
 
 **Fuera de alcance (para specs futuros):**
 
@@ -95,15 +94,12 @@ Antes de empezar, leer en `node_modules/next/dist/docs/` las guías de variables
 2. Crear `lib/supabase/database.types.ts` con `generate_typescript_types` y `lib/supabase/env.ts` con `getSupabaseEnv`. Verificación: `next build` compila.
 3. Crear `lib/supabase/server.ts` y `lib/supabase/client.ts` tipados con `Database`. Verificación: `next build` compila sin advertencias de TypeScript.
 4. Crear `lib/supabase/proxy.ts` con `updateSession` y `proxy.ts` en la raíz con su `matcher`. Leer antes `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md`. Verificación: `next build` lista el Proxy y `next dev` sirve todas las pantallas sin errores.
-5. Crear `scripts/supabase-check.mjs` y el script `supabase:check` en `package.json`. Verificación: `npm run supabase:check` imprime `SUPABASE OK`.
-6. Actualizar `CLAUDE.md` con la sección "Supabase (SPEC 04)": los tres módulos (`client.ts`, `server.ts` y `proxy.ts`), cuál usar en cada caso, las variables y el script.
+5. Actualizar `CLAUDE.md` con la sección "Supabase (SPEC 04)": los tres módulos (`client.ts`, `server.ts` y `proxy.ts`), cuál usar en cada caso y las variables.
 
 ## Criterios de aceptación
 
 - [ ] `next build` termina sin errores ni advertencias de TypeScript.
 - [ ] `package.json` incluye `@supabase/supabase-js` y `@supabase/ssr` en `dependencies`.
-- [ ] Con `.env.local` válido, `npm run supabase:check` imprime `SUPABASE OK` y sale con código 0.
-- [ ] Con una publishable key inválida, `npm run supabase:check` imprime un error y sale con código 1.
 - [ ] Si falta `NEXT_PUBLIC_SUPABASE_URL`, llamar a `createClient()` lanza un error que nombra la variable.
 - [ ] `lib/supabase/server.ts` y `lib/supabase/client.ts` devuelven `SupabaseClient<Database>`.
 - [ ] Existe `proxy.ts` en la raíz (no `middleware.ts`), y `next build` lo reconoce sin avisos de deprecación.
@@ -113,7 +109,7 @@ Antes de empezar, leer en `node_modules/next/dist/docs/` las guías de variables
 - [ ] La consola del navegador no muestra errores nuevos en ninguna pantalla.
 - [ ] `.env.template` incluye las dos claves nuevas vacías, y `.env.local` no aparece en `git status`.
 - [ ] Ninguna clave `service_role` o `sb_secret_…` aparece en el repo ni en `.env.template`.
-- [ ] `CLAUDE.md` documenta los clientes, las variables y `npm run supabase:check`.
+- [ ] `CLAUDE.md` documenta los clientes y las variables.
 
 ## Decisiones
 
@@ -128,7 +124,7 @@ Antes de empezar, leer en `node_modules/next/dist/docs/` las guías de variables
 - **Sí:** tres módulos en `lib/supabase/` (`client.ts`, `server.ts` y `proxy.ts`). Es el patrón documentado por Supabase y cubre Client Components, Server Components/Actions y el proxy.
 - **Sí:** `getSupabaseEnv` falla con un mensaje claro. Una variable ausente se detecta enseguida y no aparece como un error opaco de red.
 - **Sí:** tipos generados desde ya, aunque el esquema esté vacío. Los specs siguientes solo tienen que regenerarlos.
-- **Sí:** script `supabase:check` para verificar la conexión. Sin tablas, es la única prueba real, y no expone ningún endpoint ni toca la UI.
+- **No:** script `supabase:check`, por decisión del usuario. Las credenciales ya están en `.env.local` y no hace falta un comando de comprobación en el repo.
 - **No:** Route Handler `/api/health`. Sería un endpoint público solo para depurar.
 - **No:** stack local con Docker. Se trabaja contra el proyecto remoto enlazado en `.mcp.json`.
 
@@ -141,7 +137,7 @@ Antes de empezar, leer en `node_modules/next/dist/docs/` las guías de variables
 | Si Supabase no responde o faltan variables, el proxy rompe todas las páginas.          | `updateSession` captura el error, lo registra con `console.error` y devuelve `NextResponse.next()` para que la página siga cargando.                                                      |
 | Se versiona por error una clave secreta.                                               | Solo se usa la publishable key, que es pública por diseño. `.env*` sigue ignorado salvo `.env.template`, y un criterio comprueba que no hay claves `sb_secret_`/`service_role`.           |
 | La API de `@supabase/ssr` difiere de lo conocido (versión nueva).                      | Consultar `search_docs` del MCP de Supabase antes del paso 3.                                                                                                                             |
-| El proyecto gratuito se pausa por inactividad y `supabase:check` falla.                | El script imprime el error real. Basta con reanudar el proyecto desde el panel.                                                                                                           |
+| El proyecto gratuito se pausa por inactividad y las peticiones fallan.                 | El proxy registra el error y deja cargar la página. Basta con reanudar el proyecto desde el panel.                                                                                        |
 
 ## Lo que **no** entra en este spec
 

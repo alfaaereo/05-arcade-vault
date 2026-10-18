@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "format": "prettier --write .",
-    "supabase:check": "node --env-file=.env.local scripts/supabase-check.mjs"
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
