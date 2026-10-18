@@ -1,6 +1,6 @@
 # SPEC 04 — Integración base con Supabase
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 03
 > **Fecha:** 2026-10-17
 > **Objetivo:** Integrar Supabase en la app Next.js con `@supabase/ssr` (cliente de navegador, cliente de servidor y `proxy.ts` de sesión), tipado y configurado por variables de entorno, sin cambiar ninguna pantalla.
