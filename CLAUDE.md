@@ -54,3 +54,12 @@ Usa siempre /frontend-design para diseñar la interfaz de usuario.
 - `lib/supabase/client.ts` → `createClient()` for Client Components. `lib/supabase/server.ts` → `await createClient()` for Server Components, Server Actions and Route Handlers (create per request; reading `cookies()` makes the route dynamic, so wrap it in `<Suspense>`).
 - Env vars in `.env.local`: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_…`), read directly in both clients. Never use the secret/`service_role` key.
 - No `proxy.ts` session refresh, env validation module or generated types yet; those come with the auth/schema specs.
+
+## Embedded games (SPEC 05)
+
+- Real games are standalone HTML/canvas builds copied from `references/started-games/` into `public/games/<id>/` and loaded in an iframe. `references/` stays untouched as the original source; edit the copy in `public/`.
+- The optional `src` field on `Game` (`lib/games.ts`) picks the player: with `src`, `app/juegos/[id]/jugar/page.tsx` renders `EmbeddedGamePlayer` (`components/embedded-game-player.tsx`); without it, the simulated `GamePlayer`. Only `asteroids` has `src` today; `rocas` is still simulated.
+- `postMessage` protocol (all types prefixed `av:`): the platform sends `av:pause`, `av:resume`, `av:restart` and `av:end`; the game replies once per match with `av:gameover { score }`. Both sides check `event.source` and `event.origin`.
+- The game detects embedding with `window.parent !== window`. Embedded, it draws no "GAME OVER" overlay and ignores Space to restart; opened directly, it behaves like the original.
+- The game keeps its own look and HUD inside the canvas. The platform bar shows only PAUSA/REANUDAR, FIN and SALIR. Both players share `components/game-over-modal.tsx`.
+- The embedded player caps its width so the whole 4:3 screen fits in the viewport height. The platform focuses the iframe after load (also when it loads before hydration), after resuming and after restarting.

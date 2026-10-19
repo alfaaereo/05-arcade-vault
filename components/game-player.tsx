@@ -1,40 +1,32 @@
 "use client";
-
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { GameOverModal } from "@/components/game-over-modal";
 import { formatScore, type Game } from "@/lib/games";
-
 const INITIAL_LIVES = 3;
-
 // Partida simulada: no hay juego real, la puntuación sube sola.
 export function GamePlayer({ game }: { game: Game }) {
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(INITIAL_LIVES);
-  const [level, setLevel] = useState(1);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
-  const [name, setName] = useState("INVITADO");
-  const [saved, setSaved] = useState(false);
-
+  const name = "INVITADO";
   useEffect(() => {
     if (over || paused) return;
-    const t = setInterval(() => setScore((s) => s + Math.floor(10 + Math.random() * 90)), 220);
+    const t = setInterval(
+      () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
+      220,
+    );
     return () => clearInterval(t);
   }, [over, paused]);
-
-  useEffect(() => {
-    if (score > 0 && score % 2500 < 100) setLevel((l) => l + 1);
-  }, [score]);
-
+  // Un nivel nuevo cada 2.500 puntos.
+  const level = 1 + Math.floor(score / 2500);
   const restart = () => {
     setScore(0);
     setLives(INITIAL_LIVES);
-    setLevel(1);
     setPaused(false);
     setOver(false);
-    setSaved(false);
   };
-
   return (
     <div className="av-player fade-in">
       <div className="player-hud">
@@ -68,7 +60,6 @@ export function GamePlayer({ game }: { game: Game }) {
           </Link>
         </div>
       </div>
-
       <div className="crt">
         <div className="crt-screen">
           <div className="game-arena">
@@ -95,40 +86,7 @@ export function GamePlayer({ game }: { game: Game }) {
           <span>CARGA · 1MB</span>
         </div>
       </div>
-
-      {over && (
-        <div className="modal-bd">
-          <div className="modal" role="dialog" aria-modal="true" aria-labelledby="game-over-title">
-            <h2 id="game-over-title">FIN DEL JUEGO</h2>
-            <div className="final-label">PUNTUACIÓN FINAL</div>
-            <div className="final">{formatScore(score)}</div>
-            {!saved ? (
-              <div className="input-row">
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value.toUpperCase().slice(0, 10))}
-                  placeholder="TUS INICIALES"
-                  aria-label="Tus iniciales"
-                />
-                {/* Sin persistencia en este MVP: solo muestra la confirmación. */}
-                <button className="btn yellow" onClick={() => setSaved(true)}>
-                  GUARDAR PUNTUACIÓN
-                </button>
-              </div>
-            ) : (
-              <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
-            )}
-            <div className="actions">
-              <button className="btn" onClick={restart}>
-                JUGAR DE NUEVO
-              </button>
-              <Link href="/games" className="btn magenta">
-                VOLVER AL VAULT
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
+      {over && <GameOverModal score={score} onRestart={restart} />}
     </div>
   );
 }
