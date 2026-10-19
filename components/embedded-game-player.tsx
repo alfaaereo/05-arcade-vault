@@ -54,7 +54,9 @@ export function EmbeddedGamePlayer({ game }: { game: Game & { src: string } }) {
   };
   const over = finalScore !== null;
   return (
-    <div className="av-player fade-in">
+    // Ancho limitado para que la pantalla 4:3 entera quepa en la ventana sin scroll:
+    // 296px = nav + márgenes + barra + marco CRT; 96px = rellenos laterales del reproductor y del CRT.
+    <div className="av-player fade-in max-w-[min(1100px,max(420px,calc((100dvh-296px)*4/3+96px)))]">
       <div className="player-hud">
         <div className="hud-actions ml-auto">
           <button className="btn yellow" onClick={togglePause} disabled={over}>
