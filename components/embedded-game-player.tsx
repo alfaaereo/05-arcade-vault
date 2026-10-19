@@ -100,7 +100,13 @@ export function EmbeddedGamePlayer({ game }: { game: Game & { src: string } }) {
           <span>CARGA · 1MB</span>
         </div>
       </div>
-      {over && <GameOverModal score={finalScore} onRestart={restart} />}
+      {over && (
+        <GameOverModal
+          score={finalScore}
+          onRestart={restart}
+          gameId={game.id}
+        />
+      )}
     </div>
   );
 }
