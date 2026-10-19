@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import type { ScoreRow } from "@/lib/games";
 import { createClient } from "@/lib/supabase/server";
 // Lectura del leaderboard real (solo servidor). Los juegos que no están en la
@@ -13,6 +14,9 @@ const dateFormat = new Intl.DateTimeFormat("es-ES", {
   timeZone: "UTC",
 });
 export async function getLeaderboards(): Promise<Leaderboards> {
+  // Fuera del try: durante el prerender cookies() rechaza a propósito y el
+  // catch lo confundiría con un fallo de Supabase.
+  await connection();
   try {
     const supabase = await createClient();
     const { data: games, error } = await supabase.from("games").select("id");
