@@ -1,6 +1,6 @@
 # SPEC 06 — Leaderboard de ASTEROIDS en Supabase: tablas, guardado y Salón
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 04, SPEC 05
 > **Fecha:** 2026-10-18
 > **Objetivo:** Crear en Supabase las tablas `games` (solo con `asteroids`) y `leaderboard`, guardar ahí la puntuación de ASTEROIDS desde el modal "FIN DEL JUEGO" y mostrarla en la pestaña ASTEROIDS de `/salon`.
