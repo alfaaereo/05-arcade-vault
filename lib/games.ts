@@ -134,6 +134,18 @@ export const GAMES: Game[] = [
     plays: "0",
     src: "/games/tetris/index.html",
   },
+  {
+    id: "arkanoid",
+    title: "ARKANOID",
+    short: "Rompe el muro ladrillo a ladrillo en cinco niveles.",
+    long: "Mueve la paleta con el ratón o las flechas y mantén la pelota en juego. Cada bloque vale 10 puntos y, al limpiar la pantalla, pasas al siguiente de cinco niveles, cada uno con su propia forma y una pelota más rápida. Tienes tres vidas: supera el quinto nivel para completar el juego.",
+    cat: "ARCADE",
+    cover: "cover-bricks",
+    color: "cyan",
+    best: 0,
+    plays: "0",
+    src: "/games/arkanoid/index.html",
+  },
 ];
 export const CATEGORIES: CategoryFilter[] = [
   "TODOS",
