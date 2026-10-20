@@ -62,6 +62,7 @@ Usa siempre /frontend-design para diseñar la interfaz de usuario.
 - `postMessage` protocol (all types prefixed `av:`): the platform sends `av:pause`, `av:resume`, `av:restart` and `av:end`; the game replies once per match with `av:gameover { score }`. Both sides check `event.source` and `event.origin`.
 - The game detects embedding with `window.parent !== window`. Embedded, it draws no "GAME OVER" overlay and ignores Space to restart; opened directly, it behaves like the original.
 - The game keeps its own look and HUD inside the canvas. The platform bar shows only PAUSA/REANUDAR, FIN and SALIR. Both players share `components/game-over-modal.tsx`.
+- To add a new real game (from `references/started-games/` or from scratch), run `/add-game <folder|description>` (`.claude/skills/add-game/`). It only writes a draft spec `specs/NN-juego-<id>.md` covering the iframe, the `av:*` protocol, the catalog entry and the `games` row. Implement it with `/spec-impl`.
 - The embedded player caps its width so the whole 4:3 screen fits in the viewport height. The platform focuses the iframe after load (also when it loads before hydration), after resuming and after restarting.
 
 ## Leaderboard (SPEC 06)
