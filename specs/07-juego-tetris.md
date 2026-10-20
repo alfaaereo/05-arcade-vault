@@ -1,6 +1,6 @@
 # SPEC 07 — Juego real TETRIS embebido y con leaderboard
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 05, SPEC 06
 > **Fecha:** 2026-10-19
 > **Objetivo:** Añadir el juego TETRIS de `references/started-games/03-tetris/` y hacerlo jugable en `/juegos/tetris/jugar` dentro de un iframe, con su puntuación guardada en Supabase y visible en `/salon`.
