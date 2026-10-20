@@ -1,9 +1,7 @@
 "use strict";
-
 const COLS = 10;
 const ROWS = 20;
 const BLOCK = 30;
-
 const COLORS = [
   null,
   "#4dd0e1", // I - cyan
@@ -15,7 +13,6 @@ const COLORS = [
   "#ffb74d", // L - orange
   "#9e9e9e", // N - tuerca (gris metálico)
 ];
-
 const PIECES = [
   null,
   [
@@ -59,9 +56,7 @@ const PIECES = [
     [8, 8, 8],
   ], // N (tuerca)
 ];
-
 const LINE_SCORES = [0, 100, 300, 500, 800];
-
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
 const nextCanvas = document.getElementById("next-canvas");
@@ -73,7 +68,6 @@ const overlay = document.getElementById("overlay");
 const overlayTitle = document.getElementById("overlay-title");
 const overlayScore = document.getElementById("overlay-score");
 const restartBtn = document.getElementById("restart-btn");
-
 let board,
   current,
   next,
@@ -86,11 +80,9 @@ let board,
   dropAccum,
   dropInterval,
   animId;
-
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
 }
-
 function randomPiece() {
   const type = Math.floor(Math.random() * 8) + 1;
   const shape = PIECES[type].map((row) => [...row]);
@@ -101,7 +93,6 @@ function randomPiece() {
     y: 0,
   };
 }
-
 function collide(shape, ox, oy) {
   for (let r = 0; r < shape.length; r++) {
     for (let c = 0; c < shape[r].length; c++) {
@@ -114,7 +105,6 @@ function collide(shape, ox, oy) {
   }
   return false;
 }
-
 function rotateCW(shape) {
   const rows = shape.length,
     cols = shape[0].length;
@@ -123,7 +113,6 @@ function rotateCW(shape) {
     for (let c = 0; c < cols; c++) result[c][rows - 1 - r] = shape[r][c];
   return result;
 }
-
 function tryRotate() {
   const rotated = rotateCW(current.shape);
   const kicks = [0, -1, 1, -2, 2];
@@ -135,14 +124,12 @@ function tryRotate() {
     }
   }
 }
-
 function merge() {
   for (let r = 0; r < current.shape.length; r++)
     for (let c = 0; c < current.shape[r].length; c++)
       if (current.shape[r][c])
         board[current.y + r][current.x + c] = current.shape[r][c];
 }
-
 function clearLines() {
   let cleared = 0;
   for (let r = ROWS - 1; r >= 0; r--) {
@@ -161,20 +148,17 @@ function clearLines() {
     updateHUD();
   }
 }
-
 function ghostY() {
   let gy = current.y;
   while (!collide(current.shape, current.x, gy + 1)) gy++;
   return gy;
 }
-
 function hardDrop() {
   const gy = ghostY();
   score += (gy - current.y) * 2;
   current.y = gy;
   lockPiece();
 }
-
 function softDrop() {
   if (!collide(current.shape, current.x, current.y + 1)) {
     current.y++;
@@ -184,13 +168,11 @@ function softDrop() {
     lockPiece();
   }
 }
-
 function lockPiece() {
   merge();
   clearLines();
   spawn();
 }
-
 function spawn() {
   current = next;
   next = randomPiece();
@@ -199,13 +181,11 @@ function spawn() {
   }
   drawNext();
 }
-
 function updateHUD() {
   scoreEl.textContent = score.toLocaleString();
   linesEl.textContent = lines;
   levelEl.textContent = level;
 }
-
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
   const color = COLORS[colorIndex];
@@ -217,7 +197,6 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
   context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
   context.globalAlpha = 1;
 }
-
 function drawGrid() {
   ctx.strokeStyle = getComputedStyle(document.body)
     .getPropertyValue("--grid-line")
@@ -236,28 +215,23 @@ function drawGrid() {
     ctx.stroke();
   }
 }
-
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawGrid();
-
   // board
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++) drawBlock(ctx, c, r, board[r][c], BLOCK);
-
   // ghost
   const gy = ghostY();
   for (let r = 0; r < current.shape.length; r++)
     for (let c = 0; c < current.shape[r].length; c++)
       if (current.shape[r][c])
         drawBlock(ctx, current.x + c, gy + r, current.shape[r][c], BLOCK, 0.2);
-
   // current piece
   for (let r = 0; r < current.shape.length; r++)
     for (let c = 0; c < current.shape[r].length; c++)
       drawBlock(ctx, current.x + c, current.y + r, current.shape[r][c], BLOCK);
 }
-
 function drawNext() {
   const NB = 30;
   nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
@@ -268,15 +242,30 @@ function drawNext() {
     for (let c = 0; c < shape[r].length; c++)
       drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
 }
-
+// ── Modo embebido (iframe de Arcade Vault) ──────────────────────────────────
+// Protocolo postMessage con la plataforma: recibe av:pause | av:resume |
+// av:restart | av:end y envía av:gameover con la puntuación.
+const EMBEDDED = window.parent !== window;
+const MAX_SCORE = 10000000; // límite de la tabla leaderboard (SPEC 06)
+let gameOverSent = false;
 function endGame() {
   gameOver = true;
   cancelAnimationFrame(animId);
+  if (EMBEDDED) {
+    // El cierre de partida lo muestra el modal de la plataforma.
+    if (!gameOverSent) {
+      gameOverSent = true;
+      window.parent.postMessage(
+        { type: "av:gameover", score: Math.min(score, MAX_SCORE) },
+        location.origin,
+      );
+    }
+    return;
+  }
   overlayTitle.textContent = "GAME OVER";
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
   overlay.classList.remove("hidden");
 }
-
 function togglePause() {
   if (gameOver) return;
   paused = !paused;
@@ -290,7 +279,25 @@ function togglePause() {
     overlay.classList.remove("hidden");
   }
 }
-
+window.addEventListener("message", (e) => {
+  if (!EMBEDDED || e.source !== window.parent || e.origin !== location.origin)
+    return;
+  const type = e.data && e.data.type;
+  if (type === "av:pause") {
+    if (gameOver || paused) return;
+    paused = true;
+    cancelAnimationFrame(animId);
+  } else if (type === "av:resume") {
+    if (gameOver || !paused) return;
+    paused = false;
+    lastTime = performance.now();
+    animId = requestAnimationFrame(loop);
+  } else if (type === "av:restart") {
+    init();
+  } else if (type === "av:end") {
+    if (!gameOver) endGame();
+  }
+});
 function loop(ts) {
   const dt = ts - lastTime;
   lastTime = ts;
@@ -307,7 +314,6 @@ function loop(ts) {
   draw();
   animId = requestAnimationFrame(loop);
 }
-
 function init() {
   board = createBoard();
   score = 0;
@@ -315,6 +321,7 @@ function init() {
   level = 1;
   paused = false;
   gameOver = false;
+  gameOverSent = false;
   dropInterval = 1000;
   dropAccum = 0;
   lastTime = performance.now();
@@ -325,14 +332,13 @@ function init() {
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
-
 // Evita que Espacio y las flechas hagan scroll en la página.
 const GAME_KEYS = ["Space", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];
-
 document.addEventListener("keydown", (e) => {
   if (GAME_KEYS.includes(e.code)) e.preventDefault();
+  // Embebido, la pausa la controla la plataforma (av:pause / av:resume).
   if (e.code === "KeyP") {
-    togglePause();
+    if (!EMBEDDED) togglePause();
     return;
   }
   if (paused || gameOver) return;
@@ -356,13 +362,10 @@ document.addEventListener("keydown", (e) => {
   }
   updateHUD();
 });
-
 restartBtn.addEventListener("click", init);
-
 const themeToggle = document.getElementById("theme-toggle");
 const toggleIcon = themeToggle.querySelector(".toggle-icon");
 const toggleLabel = themeToggle.querySelector(".toggle-label");
-
 function applyTheme(isLight) {
   if (isLight) {
     document.body.classList.add("light-mode");
@@ -374,10 +377,8 @@ function applyTheme(isLight) {
     toggleLabel.textContent = "LIGHT";
   }
 }
-
 const savedTheme = localStorage.getItem("tetris-theme");
 applyTheme(savedTheme === "light");
-
 themeToggle.addEventListener("click", () => {
   const isLight = !document.body.classList.contains("light-mode");
   applyTheme(isLight);
@@ -385,7 +386,6 @@ themeToggle.addEventListener("click", () => {
   // Sin foco en el botón, Espacio vuelve a ser la caída instantánea.
   themeToggle.blur();
 });
-
 // Escala el bloque título + tablero + panel para que quepa en la ventana o el iframe.
 // Nunca amplía (máx. 1) para que los canvas no se vean borrosos.
 const wrapper = document.querySelector(".wrapper");
@@ -399,5 +399,4 @@ function fitWrapper() {
 }
 window.addEventListener("resize", fitWrapper);
 fitWrapper();
-
 init();
