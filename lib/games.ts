@@ -122,6 +122,18 @@ export const GAMES: Game[] = [
     plays: "0",
     src: "/games/asteroids/index.html",
   },
+  {
+    id: "tetris",
+    title: "TETRIS",
+    short: "El clásico de piezas que caen: completa líneas y sube de nivel.",
+    long: "Siete piezas clásicas y una tuerca rebelde caen sobre un tablero de 10×20. Muévelas, rótalas y completa filas para borrarlas: una, dos, tres o cuatro de golpe valen 100, 300, 500 u 800 puntos por nivel. Cada 10 líneas subes de nivel y la caída se acelera. La pieza fantasma te muestra dónde aterrizará.",
+    cat: "PUZZLE",
+    cover: "cover-tetro",
+    color: "magenta",
+    best: 0,
+    plays: "0",
+    src: "/games/tetris/index.html",
+  },
 ];
 export const CATEGORIES: CategoryFilter[] = [
   "TODOS",

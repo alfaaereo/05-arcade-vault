@@ -58,15 +58,17 @@ Usa siempre /frontend-design para diseñar la interfaz de usuario.
 ## Embedded games (SPEC 05)
 
 - Real games are standalone HTML/canvas builds copied from `references/started-games/` into `public/games/<id>/` and loaded in an iframe. `references/` stays untouched as the original source; edit the copy in `public/`.
-- The optional `src` field on `Game` (`lib/games.ts`) picks the player: with `src`, `app/juegos/[id]/jugar/page.tsx` renders `EmbeddedGamePlayer` (`components/embedded-game-player.tsx`); without it, the simulated `GamePlayer`. Only `asteroids` has `src` today; `rocas` is still simulated.
+- The optional `src` field on `Game` (`lib/games.ts`) picks the player: with `src`, `app/juegos/[id]/jugar/page.tsx` renders `EmbeddedGamePlayer` (`components/embedded-game-player.tsx`); without it, the simulated `GamePlayer`. `asteroids` and `tetris` (SPEC 07) have `src`; their simulated look-alikes `rocas` and `caida` stay simulated.
 - `postMessage` protocol (all types prefixed `av:`): the platform sends `av:pause`, `av:resume`, `av:restart` and `av:end`; the game replies once per match with `av:gameover { score }`. Both sides check `event.source` and `event.origin`.
 - The game detects embedding with `window.parent !== window`. Embedded, it draws no "GAME OVER" overlay and ignores Space to restart; opened directly, it behaves like the original.
 - The game keeps its own look and HUD inside the canvas. The platform bar shows only PAUSA/REANUDAR, FIN and SALIR. Both players share `components/game-over-modal.tsx`.
+- To add a new real game (from `references/started-games/` or from scratch), run `/add-game <folder|description>` (`.claude/skills/add-game/`). It only writes a draft spec `specs/NN-juego-<id>.md` covering the iframe, the `av:*` protocol, the catalog entry and the `games` row. Implement it with `/spec-impl`.
+- A game that is not a single 4:3 canvas scales its whole layout inside the iframe (max 1, letterboxed) instead of changing the player. `tetris` does this in `fitWrapper()` (`public/games/tetris/game.js`).
 - The embedded player caps its width so the whole 4:3 screen fits in the viewport height. The platform focuses the iframe after load (also when it loads before hydration), after resuming and after restarting.
 
 ## Leaderboard (SPEC 06)
 
-- Supabase tables `games` (`id`, `title`, `created_at`; `id` matches `lib/games.ts`) and `leaderboard` (`id`, `game_id` → `games.id`, `player_name`, `score`, `created_at`). Only `asteroids` is in `games`; add a game there when it becomes real. `lib/games.ts` stays the catalog source.
+- Supabase tables `games` (`id`, `title`, `created_at`; `id` matches `lib/games.ts`) and `leaderboard` (`id`, `game_id` → `games.id`, `player_name`, `score`, `created_at`). `asteroids` and `tetris` are in `games`; add a game there (data-only migration, no type regeneration) when it becomes real. `lib/games.ts` stays the catalog source.
 - Migrations live in `supabase/migrations/<version>_<name>.sql` and are applied to the remote project with the MCP `apply_migration`; rename the file to the version `list_migrations` reports. After any schema change, regenerate `lib/supabase/database.types.ts` with `generate_typescript_types`. Both clients are typed with `Database`.
 - RLS on both tables: public SELECT; public INSERT on `leaderboard` only for `game_id`, `player_name`, `score` (column grant), with name `^[A-Z0-9_ ]{1,10}$` (no edge spaces) and score 0–10,000,000. No UPDATE/DELETE. Accepted risk: without auth anyone with the publishable key can insert fake scores; the auth spec must close anonymous INSERT.
 - Read: `getLeaderboards()` in `lib/leaderboard.ts` (server) returns the top 12 per game in `games` (score desc, earlier `created_at` wins ties), with dates preformatted `dd/mm/aaaa` in UTC. It calls `await connection()` before its `try` so the prerender rejection of `cookies()` is not caught as a Supabase error. `/salon` renders it inside `<Suspense>`.
