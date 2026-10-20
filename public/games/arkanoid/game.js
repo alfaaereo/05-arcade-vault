@@ -29,6 +29,50 @@ let gameState = "playing";
 let currentLevel = 1;
 let isPaused = false;
 const keys = { ArrowLeft: false, ArrowRight: false };
+// ── Modo embebido (iframe de Arcade Vault) ──────────────────────────────────
+// Protocolo postMessage con la plataforma: recibe av:pause | av:resume |
+// av:restart | av:end y envía av:gameover con la puntuación.
+const EMBEDDED = window.parent !== window;
+let gameOverSent = false;
+// Fin de partida: 'gameover' (sin vidas) o 'win' (nivel 5 completado).
+function endGame(state) {
+  gameState = state;
+  if (EMBEDDED && !gameOverSent) {
+    gameOverSent = true;
+    window.parent.postMessage({ type: "av:gameover", score }, location.origin);
+  }
+}
+// Nueva partida desde cero (el original no tiene reinicio; lo usa av:restart).
+function initGame() {
+  lives = 3;
+  score = 0;
+  gameState = "playing";
+  isPaused = false;
+  gameOverSent = false;
+  explosions = [];
+  keys.ArrowLeft = false;
+  keys.ArrowRight = false;
+  initPaddle();
+  loadLevel(1);
+}
+window.addEventListener("message", (e) => {
+  if (!EMBEDDED || e.source !== window.parent || e.origin !== location.origin)
+    return;
+  const type = e.data && e.data.type;
+  if (type === "av:pause") {
+    if (gameState === "playing") isPaused = true;
+  } else if (type === "av:resume") {
+    isPaused = false;
+    lastTime = null;
+    keys.ArrowLeft = false;
+    keys.ArrowRight = false;
+  } else if (type === "av:restart") {
+    initGame();
+    lastTime = null;
+  } else if (type === "av:end") {
+    if (gameState === "playing") endGame("gameover");
+  }
+});
 function initPaddle() {
   paddle.x = (canvas.width - paddle.w) / 2;
 }
@@ -65,7 +109,8 @@ function collideAABB(block) {
   );
 }
 canvas.addEventListener("click", (e) => {
-  if (!isPaused) return;
+  // Embebido no se puede saltar de nivel: la partida cuenta para el Salón.
+  if (!isPaused || EMBEDDED) return;
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;
@@ -98,9 +143,11 @@ document.addEventListener("keydown", (e) => {
   // Evita que las flechas hagan scroll en la página.
   if (e.key in keys) e.preventDefault();
   if (e.key in keys) keys[e.key] = true;
+  // Embebido, la pausa la controla la plataforma (av:pause / av:resume).
   if (
     (e.key === "p" || e.key === "P" || e.key === "Escape") &&
-    gameState === "playing"
+    gameState === "playing" &&
+    !EMBEDDED
   ) {
     isPaused = !isPaused;
   }
@@ -163,7 +210,7 @@ function update(dt) {
       playSound(breakSound);
       if (blocks.every((b) => !b.alive)) {
         if (currentLevel < 5) loadLevel(currentLevel + 1);
-        else gameState = "win";
+        else endGame("win");
       }
       break; // one block per frame
     }
@@ -176,7 +223,7 @@ function update(dt) {
     lives--;
     if (lives <= 0) {
       lives = 0;
-      gameState = "gameover";
+      endGame("gameover");
     } else {
       initBall();
     }
@@ -269,6 +316,8 @@ function draw() {
       drawSprite(ctx, "ball", bx, 10, ballSize, ballSize);
     }
   }
+  // Embebido, el cierre de partida y la pausa los muestra la plataforma.
+  if (EMBEDDED) return;
   if (gameState === "gameover") drawOverlay("GAME OVER");
   if (gameState === "win") drawOverlay("¡Completaste el juego!");
   if (isPaused) drawPauseOverlay();
