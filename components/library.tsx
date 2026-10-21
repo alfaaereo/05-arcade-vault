@@ -1,19 +1,16 @@
 "use client";
-
 import { useState } from "react";
 import { GameCard } from "@/components/game-card";
-import { CATEGORIES, GAMES, type CategoryFilter } from "@/lib/games";
-
-export function Library() {
+import { CATEGORIES, type CategoryFilter, type Game } from "@/lib/games";
+// Recibe los juegos ya filtrados por la tabla games de Supabase (app/games/page.tsx).
+export function Library({ games }: { games: Game[] }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("TODOS");
-
-  const filtered = GAMES.filter(
+  const filtered = games.filter(
     (g) =>
       (category === "TODOS" || g.cat === category) &&
       g.title.toLowerCase().includes(query.toLowerCase()),
   );
-
   return (
     <>
       <div className="av-filters">
@@ -38,14 +35,15 @@ export function Library() {
           ))}
         </div>
       </div>
-
       <div className="av-grid">
         {filtered.map((g) => (
           <GameCard key={g.id} game={g} />
         ))}
         {filtered.length === 0 && (
           <div className="col-span-full p-20 text-center text-ink-faint">
-            <div className="pixel mb-3 text-[14px] text-magenta">NO HAY RESULTADOS</div>
+            <div className="pixel mb-3 text-[14px] text-magenta">
+              NO HAY RESULTADOS
+            </div>
             <div>Intenta otra búsqueda o categoría.</div>
           </div>
         )}
