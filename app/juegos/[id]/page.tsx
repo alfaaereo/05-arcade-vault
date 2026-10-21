@@ -1,20 +1,84 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { formatScore, GAMES, getGame, seededScores } from "@/lib/games";
-
+import { Suspense } from "react";
+import { formatScore, GAMES, getGame } from "@/lib/games";
+import { getGameScores } from "@/lib/leaderboard";
 export function generateStaticParams() {
   return GAMES.map((g) => ({ id: g.id }));
 }
-
 const TOP_CLASS = ["top1", "top2", "top3"];
-
-export default async function GameDetailPage({ params }: PageProps<"/juegos/[id]">) {
+// Contador y récord reales; el resto del detalle va en el shell estático.
+async function ScoreStats({ id }: { id: string }) {
+  const result = await getGameScores(id);
+  const ok = result.status === "ok";
+  return (
+    <>
+      <div>
+        <div className="l">Puntuaciones</div>
+        <div className="v">{ok ? formatScore(result.total) : "—"}</div>
+      </div>
+      <div>
+        <div className="l">Mejor global</div>
+        <div className="v text-magenta [text-shadow:0_0_6px_rgba(255,0,110,0.5)]">
+          {ok ? formatScore(result.best) : "—"}
+        </div>
+      </div>
+    </>
+  );
+}
+function StatsFallback() {
+  return (
+    <>
+      <div>
+        <div className="l">Puntuaciones</div>
+        <div className="v">…</div>
+      </div>
+      <div>
+        <div className="l">Mejor global</div>
+        <div className="v text-magenta">…</div>
+      </div>
+    </>
+  );
+}
+async function TopScores({ id }: { id: string }) {
+  const result = await getGameScores(id);
+  if (result.status === "error")
+    return (
+      <p className="py-6 text-center text-ink-faint" role="alert">
+        No se pudieron cargar las puntuaciones. Recarga la página para
+        intentarlo de nuevo.
+      </p>
+    );
+  if (result.rows.length === 0)
+    return (
+      <div className="py-6 text-center">
+        <div className="pixel mb-4 text-[11px] text-cyan">
+          SIN PUNTUACIONES TODAVÍA
+        </div>
+        <Link href={`/juegos/${id}/jugar`} className="btn yellow">
+          JUGAR AHORA
+        </Link>
+      </div>
+    );
+  return result.rows.map((r, i) => (
+    <div key={`${r.rank}-${r.name}`} className={`lb-row ${TOP_CLASS[i] ?? ""}`}>
+      <div className="rk">#{String(r.rank).padStart(2, "0")}</div>
+      <div className="pl">
+        {r.name}
+        <div className="text-[10px] tracking-[0.1em] text-ink-faint">
+          {r.date}
+        </div>
+      </div>
+      <div className="sc">{formatScore(r.score)}</div>
+    </div>
+  ));
+}
+export default async function GameDetailPage({
+  params,
+}: PageProps<"/juegos/[id]">) {
   const { id } = await params;
   const game = getGame(id);
   if (!game) notFound();
-
-  const scores = seededScores(id.length * 17 + 3, 10);
-
   return (
     <div className="av-detail fade-in">
       <div>
@@ -31,24 +95,19 @@ export default async function GameDetailPage({ params }: PageProps<"/juegos/[id]
           <h2 className="neon-cyan">{game.title}</h2>
           <p>{game.long}</p>
           <div className="stat-strip">
-            <div>
-              <div className="l">Partidas</div>
-              <div className="v">{game.plays}</div>
-            </div>
-            <div>
-              <div className="l">Mejor global</div>
-              <div className="v text-magenta [text-shadow:0_0_6px_rgba(255,0,110,0.5)]">
-                {formatScore(game.best)}
-              </div>
-            </div>
+            <Suspense fallback={<StatsFallback />}>
+              <ScoreStats id={game.id} />
+            </Suspense>
             <div>
               <div className="l">Dificultad</div>
-              <div className="v text-yellow [text-shadow:0_0_6px_rgba(245,255,0,0.5)]">★ ★ ★ ☆ ☆</div>
+              <div className="v text-yellow [text-shadow:0_0_6px_rgba(245,255,0,0.5)]">
+                ★ ★ ★ ☆ ☆
+              </div>
             </div>
           </div>
           <div className="detail-actions">
             <Link href={`/juegos/${game.id}/jugar`} className="btn xl pulse">
-              ▶  JUGAR AHORA
+              ▶ JUGAR AHORA
             </Link>
             <Link href="/games" className="btn ghost lg">
               VOLVER AL VAULT
@@ -56,20 +115,18 @@ export default async function GameDetailPage({ params }: PageProps<"/juegos/[id]
           </div>
         </div>
       </div>
-
       <aside>
         <div className="leaderboard">
           <h3>MEJORES PUNTUACIONES</h3>
-          {scores.map((r, i) => (
-            <div key={r.name} className={`lb-row ${TOP_CLASS[i] ?? ""}`}>
-              <div className="rk">#{String(r.rank).padStart(2, "0")}</div>
-              <div className="pl">
-                {r.name}
-                <div className="text-[10px] tracking-[0.1em] text-ink-faint">{r.date}</div>
+          <Suspense
+            fallback={
+              <div className="py-6 text-center text-ink-faint" role="status">
+                CARGANDO PUNTUACIONES…
               </div>
-              <div className="sc">{formatScore(r.score)}</div>
-            </div>
-          ))}
+            }
+          >
+            <TopScores id={game.id} />
+          </Suspense>
         </div>
       </aside>
     </div>

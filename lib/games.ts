@@ -11,8 +11,6 @@ export type Game = {
   cat: GameCategory;
   cover: string;
   color: GameColor;
-  best: number;
-  plays: string;
   // URL del juego embebible en public/. Sin src, el reproductor simula la partida.
   src?: string;
 };
@@ -31,8 +29,6 @@ export const GAMES: Game[] = [
     cat: "SHOOTER",
     cover: "cover-rocas",
     color: "cyan",
-    best: 0,
-    plays: "0",
     src: "/games/asteroids/index.html",
   },
   {
@@ -43,8 +39,6 @@ export const GAMES: Game[] = [
     cat: "PUZZLE",
     cover: "cover-tetro",
     color: "magenta",
-    best: 0,
-    plays: "0",
     src: "/games/tetris/index.html",
   },
   {
@@ -55,9 +49,17 @@ export const GAMES: Game[] = [
     cat: "ARCADE",
     cover: "cover-bricks",
     color: "cyan",
-    best: 0,
-    plays: "0",
     src: "/games/arkanoid/index.html",
+  },
+  {
+    id: "snake",
+    title: "SNAKE",
+    short: "Come frutas, crece y no te muerdas la cola.",
+    long: "Guía la serpiente con las flechas o WASD por un tablero de 20×14. Cada fruta suma 10 puntos por nivel y te hace crecer. Cada 5 frutas subes de nivel y la serpiente acelera. Si chocas con la pared o con tu propio cuerpo, se acabó.",
+    cat: "ARCADE",
+    cover: "cover-snake",
+    color: "green",
+    src: "/games/snake/index.html",
   },
 ];
 export const CATEGORIES: CategoryFilter[] = [

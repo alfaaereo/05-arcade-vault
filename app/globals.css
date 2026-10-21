@@ -453,16 +453,20 @@
     image-rendering: pixelated;
   }
 
-  .cover-snake { background: linear-gradient(135deg,#003a2a,#0a0a18); }
+  /* Mismo aspecto que el juego (public/games/snake): retícula de puntos, pared
+     magenta, tubo neón con curva y fruta pixel-art. SVG para que escale igual en
+     la tarjeta y en el detalle. */
+  .cover-snake {
+    background:
+      radial-gradient(rgba(0,245,255,0.18) 1px, transparent 1.5px) 0 0/20px 20px,
+      linear-gradient(135deg,#003a2a,#0a0a18);
+    box-shadow: inset 0 0 0 2px rgba(255,0,110,0.8), inset 0 0 22px rgba(255,0,110,0.45);
+  }
   .cover-snake::after {
     content: "";
-    position: absolute; inset: 0;
-    background-image:
-      radial-gradient(circle at 70% 50%, var(--magenta) 0 6px, transparent 7px),
-      linear-gradient(90deg, var(--green) 0 40px, transparent 40px) 20% 50% / 200px 12px no-repeat,
-      linear-gradient(90deg, var(--green) 0 12px, transparent 12px) calc(20% + 40px) calc(50% - 12px)/12px 12px no-repeat,
-      linear-gradient(90deg, var(--green) 0 12px, transparent 12px) calc(20% + 28px) calc(50% - 12px)/12px 12px no-repeat;
-    filter: drop-shadow(0 0 6px rgba(0,255,136,0.6));
+    position: absolute; inset: 12%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 140'%3E%3Cpolyline points='28,104 122,104 122,62 160,62 160,30' fill='none' stroke='%2300ff88' stroke-opacity='.25' stroke-width='30' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='28,104 122,104 122,62 160,62 160,30' fill='none' stroke='%230a7a4e' stroke-width='20' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='28,104 122,104 122,62 160,62 160,30' fill='none' stroke='%2300ff88' stroke-opacity='.6' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Crect x='147' y='17' width='26' height='26' rx='8' fill='%2300ff88'/%3E%3Crect x='151' y='22' width='5' height='5' fill='%230a0a0f'/%3E%3Crect x='164' y='22' width='5' height='5' fill='%230a0a0f'/%3E%3Cg fill='%23ff3b3b'%3E%3Crect x='52' y='38' width='20' height='20'/%3E%3Crect x='48' y='42' width='28' height='12'/%3E%3C/g%3E%3Crect x='56' y='42' width='5' height='5' fill='%23ff9a9a'/%3E%3Crect x='61' y='30' width='4' height='8' fill='%2339b54a'/%3E%3Crect x='65' y='30' width='7' height='4' fill='%2339b54a'/%3E%3C/svg%3E") center/contain no-repeat;
+    filter: drop-shadow(0 0 6px rgba(0,255,136,0.5));
   }
 
   .cover-glot { background: radial-gradient(circle at 50% 50%, #1a002a, #0a0a18); }
