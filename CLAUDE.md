@@ -20,12 +20,27 @@ There is no test framework set up yet.
 - Typed route helpers such as `LayoutProps<"/">` are global types generated into `.next/types` by `next dev`/`next build`.
 - The path alias `@/*` maps to the repo root.
 
-##Skills
+## Tooling and conventions
+
+- Scripts: `npm run dev`, `build`, `start`, `lint` (ESLint 9 flat config, `eslint-config-next` + `eslint-config-prettier`), `format` (Prettier, `.prettierrc.json`: double quotes, semicolons; `.prettierignore` skips `references/`).
+- ESLint enforces `no-multiple-empty-lines` with `max: 0`: code has no blank lines (template literals are respected). Markdown keeps its blank lines.
+- PostToolUse hook `.claude/hooks/format-lint.mjs` (`.claude/settings.json`, on `Write|Edit`): runs Prettier on `.ts/.tsx/.js/.jsx/.mjs/.md` files inside the project and `eslint --fix --max-warnings 0` on code files. If ESLint still reports problems it exits with code 2 and you must fix them.
+- MCP servers: Supabase (`.mcp.json`, enabled in `.claude/settings.local.json`) for migrations, SQL and type generation; Playwright for visual checks. Save Playwright screenshots in `.playwright-screenshots/` (git-ignored except `.gitkeep`).
+
+## Skills
+
 Usa siempre /frontend-design para diseñar la interfaz de usuario.
 
-## Design reference (`resources/`)
+- `/spec <requirement>` and `/spec-impl <NN-spec-name>`: from Klerith/fernando-skills, pinned in `skills-lock.json` (installed in `.agents/skills/` and `.claude/skills/`). `/spec` writes `specs/NN-<name>.md`; `/spec-impl` checks the spec is approved, creates a branch named after it and implements it step by step (one commit per step: `spec NN: paso N — …`).
+- `/add-game <folder|description>` (`.claude/skills/add-game/`, project-local): drafts the spec for a new real game. See "Embedded games".
+- `/worktree <requirement>` (user-level skill, may not be installed for every contributor): runs the requirement in an isolated git worktree under `.trees/<name>`.
+- Specs written so far: `specs/01` to `specs/09` (MVP screens, landing/about, Resend contact, Supabase, Asteroids, leaderboard, Tetris, Arkanoid, Snake).
 
-`resources/templates/` holds the design prototype for the app. It is a standalone React 18 + Babel-in-browser HTML mock (`Arcade Vault.html`), not part of the Next build. Use it as the visual and functional spec when you implement screens:
+## Design reference (`references/`)
+
+`references/` is the original source material and stays untouched: `templates/` (design prototype), `started-games/` (original game builds: `02-asteroids`, `03-tetris`, `04-arkanoid`) and `souce-assets/` (sic; e.g. `snake-assets/` sprites).
+
+`references/templates/` holds the design prototype for the app. It is a standalone React 18 + Babel-in-browser HTML mock (`Arcade Vault.html`), not part of the Next build; `home-about/` holds the landing and about prototype. Use it as the visual and functional spec when you implement screens:
 
 - Screens: `biblioteca.jsx` (game library), `detalle.jsx` (game detail), `reproductor.jsx` (game player and score saving), `auth.jsx` (login), `salon.jsx` (hall of fame / leaderboard), `nav.jsx` (navigation).
 - `data.jsx` holds the mock game catalog (`GAMES`: id, title, category, cover class, accent color, best score, play count).
@@ -35,7 +50,7 @@ Usa siempre /frontend-design para diseñar la interfaz de usuario.
 ## App structure (SPEC 01, SPEC 02)
 
 - Routes: `/` (landing), `/games` (library), `/about` (about + visual-only contact form), `/juegos/[id]` (detail), `/juegos/[id]/jugar` (player), `/login`, `/salon` (hall of fame), plus `app/not-found.tsx`. Game routes are pre-generated with `generateStaticParams`; unknown ids call `notFound()`.
-- The catalog lives in `lib/games.ts` (`GAMES`, `CATEGORIES`, `getGame`, `seededScores`, `formatScore`). It only holds real games (`asteroids`, `tetris`, `arkanoid`, `snake`); the 8 simulated games of SPEC 01 were removed, so their `/juegos/<id>` URLs now 404. Fixed landing copy (features, stats, activity, pricing, FAQ) lives in `lib/home.ts`. Always format visible numbers with `formatScore` to avoid hydration mismatches.
+- The catalog lives in `lib/games.ts` (`GAMES`, `CATEGORIES`, `getGame`, `seededScores`, `formatScore`). It only holds real games (`asteroids`, `tetris`, `arkanoid`, `snake` and more...(see `implemented-games.md`) when you need to check wich games are implemented and how to implement new ones); the 8 simulated games of SPEC 01 were removed, so their `/juegos/<id>` URLs now 404. Fixed landing copy (features, stats, activity, pricing, FAQ) lives in `lib/home.ts`. Always format visible numbers with `formatScore` to avoid hydration mismatches.
 - Shared components live in `components/`. `Nav` wraps `NavLinks` (`usePathname`) in `<Suspense>` because, with Cache Components, `usePathname` suspends on non-pre-generated params.
 - Nav links come from `LINKS` in `components/nav-links.tsx` (shared with `MobileMenu`). "Back" links in the game flow point to `/games`; the logo and the 404 point to `/`.
 - Scroll-in sections use the `.reveal` class plus `<RevealObserver />` mounted inside each page. Hidden state only applies once it adds `.reveal-ready` to `<html>`, so content stays visible without JS and with `prefers-reduced-motion`.
@@ -66,6 +81,7 @@ Usa siempre /frontend-design para diseñar la interfaz de usuario.
 - A game that is not a single 4:3 canvas scales its whole layout inside the iframe (max 1, letterboxed) instead of changing the player. `tetris` does this in `fitWrapper()` (`public/games/tetris/game.js`).
 - Games may use the mouse inside the iframe with no platform change (`arkanoid` scales `mousemove` with `getBoundingClientRect`). A game with several endings (lose or win) routes all of them through one `endGame()` that sends `av:gameover`; if the original has no restart, the copy adds an `initGame()` for `av:restart`.
 - `snake` (SPEC 09) is the first game built from the `/add-game` template, with fruit sprites copied from `references/souce-assets/snake-assets/` to `public/games/snake/assets/`. A tick-based game runs a fixed-interval accumulator over rAF (`dt` capped at 50 ms) and resets `acc` and `lastTime` on `av:resume` and `av:restart`, so the snake never jumps several cells at once.
+- Each game has a `cover-<id>` class in `app/globals.css` (card and detail). A real game's cover should look like the game: `cover-snake` draws a dot grid and glowing magenta wall on the element and an inline SVG data URI (snake tube + pixel fruit, `center/contain`) on `::after`, so it scales the same in both sizes. Check that layered `background-image` values are valid; an invalid one silently draws nothing.
 - The embedded player caps its width so the whole 4:3 screen fits in the viewport height. The platform focuses the iframe after load (also when it loads before hydration), after resuming and after restarting.
 
 ## Leaderboard (SPEC 06)

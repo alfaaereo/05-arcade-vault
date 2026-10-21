@@ -2,6 +2,5 @@
 out
 build
 node_modules
-resources/templates
 references
 next-env.d.ts
