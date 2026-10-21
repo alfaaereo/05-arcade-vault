@@ -59,6 +59,18 @@ export const GAMES: Game[] = [
     plays: "0",
     src: "/games/arkanoid/index.html",
   },
+  {
+    id: "snake",
+    title: "SNAKE",
+    short: "Come frutas, crece y no te muerdas la cola.",
+    long: "Guía la serpiente con las flechas o WASD por un tablero de 20×14. Cada fruta suma 10 puntos por nivel y te hace crecer. Cada 5 frutas subes de nivel y la serpiente acelera. Si chocas con la pared o con tu propio cuerpo, se acabó.",
+    cat: "ARCADE",
+    cover: "cover-snake",
+    color: "green",
+    best: 0,
+    plays: "0",
+    src: "/games/snake/index.html",
+  },
 ];
 export const CATEGORIES: CategoryFilter[] = [
   "TODOS",
