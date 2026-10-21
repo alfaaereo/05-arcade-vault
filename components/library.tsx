@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import { GameCard } from "@/components/game-card";
-import { CATEGORIES, type CategoryFilter, type Game } from "@/lib/games";
+import { CATEGORIES, type CategoryFilter } from "@/lib/games";
+import type { LibraryGame } from "@/lib/library";
 // Recibe los juegos ya filtrados por la tabla games de Supabase (app/games/page.tsx).
-export function Library({ games }: { games: Game[] }) {
+export function Library({ games }: { games: LibraryGame[] }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("TODOS");
   const filtered = games.filter(

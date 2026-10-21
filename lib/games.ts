@@ -11,8 +11,6 @@ export type Game = {
   cat: GameCategory;
   cover: string;
   color: GameColor;
-  best: number;
-  plays: string;
   // URL del juego embebible en public/. Sin src, el reproductor simula la partida.
   src?: string;
 };
@@ -31,8 +29,6 @@ export const GAMES: Game[] = [
     cat: "SHOOTER",
     cover: "cover-rocas",
     color: "cyan",
-    best: 0,
-    plays: "0",
     src: "/games/asteroids/index.html",
   },
   {
@@ -43,8 +39,6 @@ export const GAMES: Game[] = [
     cat: "PUZZLE",
     cover: "cover-tetro",
     color: "magenta",
-    best: 0,
-    plays: "0",
     src: "/games/tetris/index.html",
   },
   {
@@ -55,8 +49,6 @@ export const GAMES: Game[] = [
     cat: "ARCADE",
     cover: "cover-bricks",
     color: "cyan",
-    best: 0,
-    plays: "0",
     src: "/games/arkanoid/index.html",
   },
   {
@@ -67,8 +59,6 @@ export const GAMES: Game[] = [
     cat: "ARCADE",
     cover: "cover-snake",
     color: "green",
-    best: 0,
-    plays: "0",
     src: "/games/snake/index.html",
   },
 ];
