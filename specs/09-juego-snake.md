@@ -1,6 +1,6 @@
 # SPEC 09 — Juego real SNAKE embebido y con leaderboard
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 05, SPEC 06
 > **Fecha:** 2026-10-20
 > **Objetivo:** Crear el juego SNAKE y hacerlo jugable en `/juegos/snake/jugar` dentro de un iframe, con su puntuación guardada en Supabase y visible en `/salon`.
