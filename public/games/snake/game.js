@@ -28,8 +28,43 @@ const ATLAS = window.SPRITE_ATLAS;
 const FRUIT_KEYS = ATLAS ? Object.keys(ATLAS.fruits) : [];
 const fruitImg = new Image();
 let fruitImgReady = false;
+// Recorte ajustado de cada fruta: los recortes del atlas dejan mucho margen
+// transparente y el dibujo quedaría diminuto en la celda.
+const FRUIT_TRIM = {};
 fruitImg.onload = () => {
   fruitImgReady = true;
+  try {
+    const off = document.createElement("canvas");
+    off.width = fruitImg.naturalWidth;
+    off.height = fruitImg.naturalHeight;
+    const octx = off.getContext("2d", { willReadFrequently: true });
+    octx.drawImage(fruitImg, 0, 0);
+    for (const k of FRUIT_KEYS) {
+      const a = ATLAS.fruits[k];
+      const px = octx.getImageData(a.x, a.y, a.w, a.h).data;
+      let x0 = a.w,
+        y0 = a.h,
+        x1 = -1,
+        y1 = -1;
+      for (let y = 0; y < a.h; y++)
+        for (let x = 0; x < a.w; x++)
+          if (px[(y * a.w + x) * 4 + 3] > 16) {
+            if (x < x0) x0 = x;
+            if (x > x1) x1 = x;
+            if (y < y0) y0 = y;
+            if (y > y1) y1 = y;
+          }
+      if (x1 >= 0)
+        FRUIT_TRIM[k] = {
+          x: a.x + x0,
+          y: a.y + y0,
+          w: x1 - x0 + 1,
+          h: y1 - y0 + 1,
+        };
+    }
+  } catch {
+    // Abierto como file:// el lienzo queda contaminado: se usa el recorte del atlas.
+  }
 };
 if (ATLAS) fruitImg.src = ATLAS.sources.fruits;
 // ── Utilidades ───────────────────────────────────────────────────────────────
@@ -227,14 +262,31 @@ function drawBoard(now) {
   for (let y = 1; y < ROWS; y++)
     for (let x = 1; x < COLS; x++)
       ctx.fillRect(cellX(x) - 1, cellY(y) - 1, 2, 2);
-  // Marco: la pared mata. Destella en amarillo al subir de nivel.
+  // Pared: resplandor que entra desde los bordes (el marco CRT de la plataforma
+  // recorta las esquinas, así que una línea fina no bastaría). Destella en
+  // amarillo al subir de nivel.
   const flash = Math.max(0, 1 - (now - levelFlash) / 700);
-  const color = flash > 0 ? mix(C.magenta, C.yellow, flash) : C.magenta;
-  glow(color, 12 + flash * 16);
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 3;
-  ctx.strokeRect(1.5, HUD_H + 1.5, W - 3, ROWS * CELL - 3);
-  ctx.shadowBlur = 0;
+  const rgb = flash > 0 ? mix(C.magenta, C.yellow, flash) : "rgb(255, 0, 110)";
+  const a = (v) => rgb.replace("rgb", "rgba").replace(")", `, ${v})`);
+  const top = HUD_H;
+  const bottom = HUD_H + ROWS * CELL;
+  const depth = 22 + flash * 14;
+  const band = (x0, y0, x1, y1, rx, ry, rw, rh) => {
+    const g = ctx.createLinearGradient(x0, y0, x1, y1);
+    g.addColorStop(0, a(0.55 + flash * 0.3));
+    g.addColorStop(1, a(0));
+    ctx.fillStyle = g;
+    ctx.fillRect(rx, ry, rw, rh);
+  };
+  band(0, top, 0, top + depth, 0, top, W, depth);
+  band(0, bottom, 0, bottom - depth, 0, bottom - depth, W, depth);
+  band(0, 0, depth, 0, 0, top, depth, bottom - top);
+  band(W, 0, W - depth, 0, W - depth, top, depth, bottom - top);
+  ctx.fillStyle = a(1);
+  ctx.fillRect(0, top, W, 3);
+  ctx.fillRect(0, bottom - 3, W, 3);
+  ctx.fillRect(0, top, 3, bottom - top);
+  ctx.fillRect(W - 3, top, 3, bottom - top);
 }
 function drawFruit(now) {
   if (!fruit) return;
@@ -254,10 +306,11 @@ function drawFruit(now) {
   halo.addColorStop(1, "rgba(255, 0, 110, 0)");
   ctx.fillStyle = halo;
   ctx.fillRect(x - CELL / 2, y - CELL / 2, CELL * 2, CELL * 2);
-  const crop = fruit.kind && ATLAS.fruits[fruit.kind];
+  const crop =
+    fruit.kind && (FRUIT_TRIM[fruit.kind] || ATLAS.fruits[fruit.kind]);
   if (fruitImgReady && crop) {
     // Encaja el recorte en la celda manteniendo su proporción, sin suavizado.
-    const box = CELL - 6;
+    const box = CELL - 4;
     const s = Math.min(box / crop.w, box / crop.h);
     const dw = crop.w * s;
     const dh = crop.h * s;
@@ -281,48 +334,48 @@ function drawFruit(now) {
   }
 }
 function drawSnake() {
+  // Muerta se apaga a gris para no confundirse con la pared magenta.
   const dead = state === "gameover";
-  const head = dead ? C.magenta : C.green;
-  const tail = dead ? "#4a0f2a" : "#0b6b45";
-  const pad = 4;
+  const head = dead ? C.inkDim : C.green;
+  const tail = dead ? "#2a2d40" : "#0a7a4e";
   const n = snake.length;
-  // De la cola a la cabeza; solo la cabeza brilla para que el cuerpo quede nítido.
-  for (let i = n - 1; i >= 0; i--) {
-    const s = snake[i];
-    if (i === 0) glow(head, dead ? 8 : 16);
-    ctx.fillStyle = mix(head, tail, n > 1 ? i / (n - 1) : 0);
-    roundRect(
-      cellX(s.x) + pad,
-      cellY(s.y) + pad,
-      CELL - pad * 2,
-      CELL - pad * 2,
-      8,
-    );
-    // Puente hacia el segmento siguiente (más cerca de la cabeza) para que el cuerpo sea continuo.
-    if (i > 0) {
-      const p = snake[i - 1];
-      const x = Math.min(s.x, p.x);
-      const y = Math.min(s.y, p.y);
-      const horiz = s.y === p.y;
-      ctx.fillRect(
-        cellX(x) + (horiz ? CELL / 2 : pad),
-        cellY(y) + (horiz ? pad : CELL / 2),
-        horiz ? CELL : CELL - pad * 2,
-        horiz ? CELL - pad * 2 : CELL,
-      );
-    }
-  }
+  const cx = (s) => cellX(s.x) + CELL / 2;
+  const cy = (s) => cellY(s.y) + CELL / 2;
+  // Tubo neón: un solo trazo por los centros, de la cola a la cabeza.
+  const body = () => {
+    ctx.beginPath();
+    ctx.moveTo(cx(snake[n - 1]), cy(snake[n - 1]));
+    for (let i = n - 2; i >= 0; i--) ctx.lineTo(cx(snake[i]), cy(snake[i]));
+    ctx.stroke();
+  };
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.lineWidth = 26;
+  ctx.strokeStyle = tail;
+  if (!dead) glow(C.green, 12);
+  body();
+  ctx.shadowBlur = 0;
+  // Brillo central del tubo.
+  ctx.strokeStyle = dead
+    ? "rgba(138, 143, 181, 0.35)"
+    : "rgba(0, 255, 136, 0.55)";
+  ctx.lineWidth = 8;
+  body();
+  // Cabeza: algo más ancha que el cuerpo.
+  const hs = snake[0];
+  if (!dead) glow(C.green, 18);
+  ctx.fillStyle = head;
+  roundRect(cellX(hs.x) + 3, cellY(hs.y) + 3, CELL - 6, CELL - 6, 11);
   ctx.shadowBlur = 0;
   // Ojos mirando hacia donde avanza la cabeza.
-  const h = snake[0];
   const d = DIRS[dir];
-  const cx = cellX(h.x) + CELL / 2 + d.x * 7;
-  const cy = cellY(h.y) + CELL / 2 + d.y * 7;
+  const ex = cx(hs) + d.x * 7;
+  const ey = cy(hs) + d.y * 7;
   const ox = d.y !== 0 ? 7 : 0;
   const oy = d.x !== 0 ? 7 : 0;
   ctx.fillStyle = C.bg;
-  ctx.fillRect(cx - ox - 3, cy - oy - 3, 6, 6);
-  ctx.fillRect(cx + ox - 3, cy + oy - 3, 6, 6);
+  ctx.fillRect(ex - ox - 3, ey - oy - 3, 6, 6);
+  ctx.fillRect(ex + ox - 3, ey + oy - 3, 6, 6);
 }
 function drawHUD() {
   ctx.fillStyle = C.hud;
