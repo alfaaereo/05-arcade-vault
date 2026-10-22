@@ -33,6 +33,7 @@ Usa siempre /frontend-design para diseñar la interfaz de usuario.
 
 - `/spec <requirement>` and `/spec-impl <NN-spec-name>`: from Klerith/fernando-skills, pinned in `skills-lock.json` (installed in `.agents/skills/` and `.claude/skills/`). `/spec` writes `specs/NN-<name>.md`; `/spec-impl` checks the spec is approved, creates a branch named after it and implements it step by step (one commit per step: `spec NN: paso N — …`).
 - `/add-game <folder|description>` (`.claude/skills/add-game/`, project-local): drafts the spec for a new real game. See "Embedded games".
+- Subagent `game-planner` (`.claude/agents/game-planner.md`): decides which game to add next. It proposes 1–3 candidates without repeating earlier ones, keeps the To Do in `references/game-suggestions-todo.md` and its persistent project memory in `.claude/agent-memory/game-planner/MEMORY.md` (versioned). Its recommendation ends with `/add-game <description>`.
 - `/worktree <requirement>` (user-level skill, may not be installed for every contributor): runs the requirement in an isolated git worktree under `.trees/<name>`.
 - Specs written so far: `specs/01` to `specs/09` (MVP screens, landing/about, Resend contact, Supabase, Asteroids, leaderboard, Tetris, Arkanoid, Snake).
 
