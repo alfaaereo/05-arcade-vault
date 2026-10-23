@@ -119,7 +119,8 @@ export function EmbeddedGamePlayer({ game }: { game: Game & { src: string } }) {
   return (
     // Ancho limitado para que la pantalla 4:3 entera quepa en la ventana sin scroll:
     // 296px = nav + márgenes + barra + marco CRT; 96px = rellenos laterales del reproductor y del CRT.
-    <div className="av-player fade-in max-w-[min(1100px,max(420px,calc((100dvh-296px)*4/3+96px)))]">
+    // En táctil horizontal (modo inmersivo, sin nav ni pie del CRT): 108px de alto y 56px de rellenos.
+    <div className="av-player fade-in max-w-[min(1100px,max(420px,calc((100dvh-296px)*4/3+96px)))] [@media(pointer:coarse)_and_(orientation:landscape)]:max-w-[calc((100dvh-108px)*4/3+56px)]">
       <div className="player-hud">
         <div className="hud-actions ml-auto">
           {/* z-[90]: por encima del fondo del modal (z 80) para cambiar la skin con el modal abierto. */}

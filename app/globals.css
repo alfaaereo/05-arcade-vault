@@ -763,6 +763,16 @@
   .tc-btn.right { grid-area: 2 / 3; }
   .tc-btn.left { grid-area: 2 / 1; }
   .tc-btn.top { grid-area: 1 / 2; }
+  /* Modo inmersivo en táctil horizontal: sin nav ni pie del CRT para que el juego quepa en el alto. */
+  @media (pointer: coarse) and (orientation: landscape) {
+    body:has(.av-player) .av-nav { display: none; }
+    .av-player { margin-top: 8px; }
+    /* La barra usa todo el ancho de la ventana para quedar en una sola fila sobre el CRT. */
+    .av-player .player-hud { position: relative; left: 50%; width: calc(100vw - 32px); translate: -50%; }
+    .av-player .hud-actions { flex-wrap: nowrap; }
+    .av-player .crt { padding: 12px; }
+    .av-player .crt-bottom { display: none; }
+  }
   .touch-hint {
     margin-top: 12px;
     text-align: center;
