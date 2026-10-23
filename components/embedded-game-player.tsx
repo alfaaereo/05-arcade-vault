@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { GameOverModal } from "@/components/game-over-modal";
+import { TouchControls } from "@/components/touch-controls";
 import type { Game } from "@/lib/games";
 const SKINS = ["clasico", "neon", "retro"] as const;
 const MODES = ["oscuro", "claro"] as const;
@@ -18,7 +19,8 @@ type ParentToGame =
   | { type: "av:resume" }
   | { type: "av:restart" }
   | { type: "av:end" }
-  | { type: "av:skin"; skin: Skin; mode: Mode };
+  | { type: "av:skin"; skin: Skin; mode: Mode }
+  | { type: "av:key"; code: string; down: boolean };
 // Lee la skin guardada para el juego (av_skin_<id>); valores inválidos caen en los de por defecto.
 function readSkin(id: string): { skin: Skin; mode: Mode } {
   try {
@@ -154,6 +156,14 @@ export function EmbeddedGamePlayer({ game }: { game: Game & { src: string } }) {
             }}
             className="absolute inset-0 block h-full w-full border-0"
           />
+          {/* Se desmonta en pausa y con el modal abierto: al hacerlo suelta las teclas pulsadas. */}
+          {game.controls && !paused && !over && (
+            <TouchControls
+              controls={game.controls}
+              color={game.color}
+              onKey={(code, down) => send({ type: "av:key", code, down })}
+            />
+          )}
           {paused && (
             <div className="crt-content z-[5] bg-black/60">
               <div>
@@ -165,6 +175,7 @@ export function EmbeddedGamePlayer({ game }: { game: Game & { src: string } }) {
             </div>
           )}
         </div>
+        {!game.controls && <p className="touch-hint">REQUIERE TECLADO</p>}
         <div className="crt-bottom">
           <span className="led">SEÑAL OK</span>
           <span>{game.title} · CRT-83 · 60 HZ</span>
