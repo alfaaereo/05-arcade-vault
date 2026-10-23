@@ -638,6 +638,19 @@
   .hud-stat.lives .v { color: var(--magenta); text-shadow: 0 0 6px rgba(255,0,110,0.5); }
   .hud-stat.level .v { color: var(--yellow); text-shadow: 0 0 6px rgba(245,255,0,0.5); }
   .hud-actions { display: flex; gap: 10px; }
+  /* Barra compacta en táctil (SPEC 10): los 5 botones caben en una o dos filas a 375px. */
+  @media (pointer: coarse) {
+    .av-player .player-hud { padding: 8px; margin-bottom: 12px; }
+    .av-player .hud-actions { flex-wrap: wrap; gap: 6px; width: 100%; }
+    .av-player .hud-actions .btn {
+      flex: 1 1 auto;
+      min-height: 40px;
+      padding: 8px 10px;
+      font-size: 8px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+  }
 
   .crt {
     position: relative;
