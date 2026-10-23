@@ -13,6 +13,22 @@ export type Game = {
   color: GameColor;
   // URL del juego embebible en public/. Sin src, el reproductor simula la partida.
   src?: string;
+  // Mando táctil que la plataforma superpone al CRT (SPEC 10). Sin controls, en táctil se avisa "REQUIERE TECLADO".
+  controls?: TouchControls;
+};
+export type TouchButton = {
+  code: string; // KeyboardEvent.code que se envía, p. ej. "Space"
+  label: string; // texto del botón, p. ej. "DISPARO"
+  repeat?: boolean; // auto-repetición mientras se mantiene
+};
+export type TouchControls = {
+  pad: {
+    code: string;
+    dir: "up" | "down" | "left" | "right";
+    repeat?: boolean;
+  }[];
+  // 0–4, en rombo: el 1.º abajo, el 2.º a la derecha, el 3.º a la izquierda, el 4.º arriba.
+  buttons: TouchButton[];
 };
 export type ScoreRow = {
   rank: number;
@@ -30,6 +46,14 @@ export const GAMES: Game[] = [
     cover: "cover-rocas",
     color: "cyan",
     src: "/games/asteroids/index.html",
+    controls: {
+      pad: [
+        { code: "ArrowLeft", dir: "left" },
+        { code: "ArrowUp", dir: "up" },
+        { code: "ArrowRight", dir: "right" },
+      ],
+      buttons: [{ code: "Space", label: "DISPARO" }],
+    },
   },
   {
     id: "tetris",
@@ -40,6 +64,17 @@ export const GAMES: Game[] = [
     cover: "cover-tetro",
     color: "magenta",
     src: "/games/tetris/index.html",
+    controls: {
+      pad: [
+        { code: "ArrowLeft", dir: "left", repeat: true },
+        { code: "ArrowDown", dir: "down", repeat: true },
+        { code: "ArrowRight", dir: "right", repeat: true },
+      ],
+      buttons: [
+        { code: "Space", label: "CAÍDA" },
+        { code: "ArrowUp", label: "ROTAR" },
+      ],
+    },
   },
   {
     id: "arkanoid",
@@ -50,6 +85,13 @@ export const GAMES: Game[] = [
     cover: "cover-bricks",
     color: "cyan",
     src: "/games/arkanoid/index.html",
+    controls: {
+      pad: [
+        { code: "ArrowLeft", dir: "left" },
+        { code: "ArrowRight", dir: "right" },
+      ],
+      buttons: [],
+    },
   },
   {
     id: "snake",
@@ -60,6 +102,15 @@ export const GAMES: Game[] = [
     cover: "cover-snake",
     color: "green",
     src: "/games/snake/index.html",
+    controls: {
+      pad: [
+        { code: "ArrowUp", dir: "up" },
+        { code: "ArrowLeft", dir: "left" },
+        { code: "ArrowRight", dir: "right" },
+        { code: "ArrowDown", dir: "down" },
+      ],
+      buttons: [],
+    },
   },
 ];
 export const CATEGORIES: CategoryFilter[] = [
