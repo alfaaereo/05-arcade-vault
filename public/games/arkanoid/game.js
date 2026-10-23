@@ -258,8 +258,30 @@ window.addEventListener("message", (e) => {
     if (gameState === "playing") endGame("gameover");
   } else if (type === "av:skin") {
     applySkin(e.data.skin, e.data.mode);
+  } else if (type === "av:key") {
+    pressKey(e.data.code, e.data.down);
   }
 });
+// Mando táctil de la plataforma (SPEC 10): av:key se convierte en una tecla
+// sintética que procesan los manejadores de teclado de siempre (aquí, e.key).
+const KEY_OF = {
+  ArrowUp: "ArrowUp",
+  ArrowDown: "ArrowDown",
+  ArrowLeft: "ArrowLeft",
+  ArrowRight: "ArrowRight",
+  Space: " ",
+};
+function pressKey(code, down) {
+  if (!Object.hasOwn(KEY_OF, code)) return;
+  document.dispatchEvent(
+    new KeyboardEvent(down ? "keydown" : "keyup", {
+      code,
+      key: KEY_OF[code],
+      bubbles: true,
+      cancelable: true,
+    }),
+  );
+}
 function initPaddle() {
   paddle.x = (canvas.width - paddle.w) / 2;
 }

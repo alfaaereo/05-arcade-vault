@@ -638,6 +638,19 @@
   .hud-stat.lives .v { color: var(--magenta); text-shadow: 0 0 6px rgba(255,0,110,0.5); }
   .hud-stat.level .v { color: var(--yellow); text-shadow: 0 0 6px rgba(245,255,0,0.5); }
   .hud-actions { display: flex; gap: 10px; }
+  /* Barra compacta en táctil (SPEC 10): los 5 botones caben en una o dos filas a 375px. */
+  @media (pointer: coarse) {
+    .av-player .player-hud { padding: 8px; margin-bottom: 12px; }
+    .av-player .hud-actions { flex-wrap: wrap; gap: 6px; width: 100%; }
+    .av-player .hud-actions .btn {
+      flex: 1 1 auto;
+      min-height: 40px;
+      padding: 8px 10px;
+      font-size: 8px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+  }
 
   .crt {
     position: relative;
@@ -684,6 +697,89 @@
     font-family: var(--pixel);
     font-size: 12px;
     text-align: center;
+  }
+  /* ===== mando táctil (SPEC 10) ===== */
+  /* Solo en pantallas táctiles; el tamaño sigue al ancho de la pantalla del CRT (cqw). */
+  .crt-screen { container-type: inline-size; }
+  .touch-controls, .touch-hint { display: none; }
+  @media (pointer: coarse) {
+    .touch-controls { display: flex; }
+    .touch-hint { display: block; }
+  }
+  .touch-controls {
+    --cell: clamp(36px, 12.5cqw, 64px);
+    position: absolute; inset: 0; z-index: 4;
+    align-items: center; justify-content: space-between;
+    padding: 0 3cqw;
+    pointer-events: none;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  }
+  .tc-pad, .tc-actions {
+    display: grid;
+    grid-template: repeat(3, var(--cell)) / repeat(3, var(--cell));
+  }
+  .tc-arm, .tc-btn {
+    pointer-events: auto;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    border: 2px solid var(--tc);
+    background: color-mix(in srgb, var(--tc) 10%, transparent);
+    color: var(--tc);
+    opacity: 0.35;
+    transition: opacity 70ms, background-color 70ms, box-shadow 70ms;
+  }
+  .tc-arm[data-pressed], .tc-btn[data-pressed] {
+    opacity: 0.9;
+    background: color-mix(in srgb, var(--tc) 32%, transparent);
+    box-shadow: 0 0 14px var(--tc), inset 0 0 10px color-mix(in srgb, var(--tc) 60%, transparent);
+  }
+  .tc-arm { display: grid; place-items: center; padding: 0; }
+  .tc-arm svg { width: 46%; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: square; }
+  .tc-arm.up { grid-area: 1 / 2; border-bottom: 0; border-radius: 6px 6px 0 0; }
+  .tc-arm.down { grid-area: 3 / 2; border-top: 0; border-radius: 0 0 6px 6px; }
+  .tc-arm.down svg { rotate: 180deg; }
+  .tc-arm.left { grid-area: 2 / 1; border-right: 0; border-radius: 6px 0 0 6px; }
+  .tc-arm.left svg { rotate: -90deg; }
+  .tc-arm.right { grid-area: 2 / 3; border-left: 0; border-radius: 0 6px 6px 0; }
+  .tc-arm.right svg { rotate: 90deg; }
+  .tc-hub {
+    grid-area: 2 / 2;
+    border: 2px solid var(--tc);
+    background: radial-gradient(circle, var(--tc) 0 3px, transparent 4px), color-mix(in srgb, var(--tc) 10%, transparent);
+    opacity: 0.35;
+  }
+  .tc-btn {
+    place-self: center;
+    width: calc(var(--cell) * 1.15);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    padding: 0;
+    color: var(--ink);
+    font-family: var(--pixel);
+    font-size: clamp(5px, 1.6cqw, 8px);
+    letter-spacing: 0.04em;
+  }
+  .tc-btn.bottom { grid-area: 3 / 2; }
+  .tc-btn.right { grid-area: 2 / 3; }
+  .tc-btn.left { grid-area: 2 / 1; }
+  .tc-btn.top { grid-area: 1 / 2; }
+  /* Modo inmersivo en táctil horizontal: sin nav ni pie del CRT para que el juego quepa en el alto. */
+  @media (pointer: coarse) and (orientation: landscape) {
+    body:has(.av-player) .av-nav { display: none; }
+    .av-player { margin-top: 8px; }
+    /* La barra usa todo el ancho de la ventana para quedar en una sola fila sobre el CRT. */
+    .av-player .player-hud { position: relative; left: 50%; width: calc(100vw - 32px); translate: -50%; }
+    .av-player .hud-actions { flex-wrap: nowrap; }
+    .av-player .crt { padding: 12px; }
+    .av-player .crt-bottom { display: none; }
+  }
+  .touch-hint {
+    margin-top: 12px;
+    text-align: center;
+    font-family: var(--pixel);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    color: var(--magenta);
   }
   .crt-bottom {
     display: flex; align-items: center; justify-content: space-between;

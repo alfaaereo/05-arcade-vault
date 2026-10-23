@@ -14,7 +14,8 @@ type ParentToGame =
       type: "av:skin";
       skin: "clasico" | "neon" | "retro";
       mode: "oscuro" | "claro";
-    }; // solo cambia el dibujo
+    } // solo cambia el dibujo
+  | { type: "av:key"; code: string; down: boolean }; // tecla del mando táctil (SPEC 10)
 
 type GameToParent = { type: "av:gameover"; score: number }; // una sola vez por partida
 ```
@@ -24,6 +25,7 @@ type GameToParent = { type: "av:gameover"; score: number }; // una sola vez por 
 - El juego envía con `targetOrigin = location.origin` y solo acepta mensajes con `event.source === window.parent` y `event.origin === location.origin`.
 - El padre llama a `iframe.contentWindow.focus()` tras cargar, tras `av:resume` y tras `av:restart`. El juego no necesita pedir el foco.
 - `av:skin { skin, mode }`: la plataforma lo envía al cargar el iframe (también si carga antes de la hidratación) y cada vez que se pulsan los botones `SKIN · …` (cíclico CLÁSICO → NEÓN → RETRO) y `MODO · …` (OSCURO ↔ CLARO), activos en pausa y con el modal abierto. La elección se guarda por juego en `localStorage` (`av_skin_<id>`, JSON `{ skin, mode }`). El juego aplica la paleta con `applySkin(skin, mode)` sin pausar, reiniciar ni tocar la puntuación; valores desconocidos caen en `clasico`/`oscuro`. Abierto directamente, el juego lee `?skin=&mode=` de la URL. Un juego sin skins ignora el mensaje. Contrato completo y estado por juego: `.claude/agents/skin-designer.md` y `references/templates/game-width-themes.md`; referencia: `public/games/asteroids/game.js`.
+- `av:key { code, down }` (SPEC 10): en pantallas táctiles (`pointer: coarse`) la plataforma superpone al CRT un mando (cruceta + hasta 4 botones en rombo) declarado en el campo `controls` del juego en `lib/games.ts`, y envía un `av:key` por cada pulsación y suelta (`down: false`). Las teclas con `repeat` reenvían keydown a los 170 ms y luego cada 50 ms. En pausa y con el modal abierto el mando no se ve y suelta las teclas pulsadas. El juego lo convierte con `pressKey(code, down)` en un `KeyboardEvent` sintético (`code` + `key` vía `KEY_OF`) despachado en `document`, así que sus manejadores de teclado no cambian. Solo acepta los `code` de `KEY_OF`: añade ahí cada tecla que declare `controls`. Sin `controls`, en táctil la plataforma muestra "REQUIERE TECLADO".
 - `score` debe ser un **entero entre 0 y 10.000.000** (`MAX_SCORE` en `lib/save-score.ts`; la BD lo impone con un `check`). Si el juego puede dar decimales o pasarse, envía `Math.min(Math.floor(score), 10_000_000)` y documéntalo como decisión en el spec.
 
 ## Modo embebido vs. abierto directamente
@@ -88,6 +90,8 @@ window.addEventListener("message", (e) => {
     clearKeys();
   } else if (type === "av:end") {
     if (state !== "gameover") endGame();
+  } else if (type === "av:key") {
+    pressKey(e.data.code, e.data.down); // KeyboardEvent sintético (ver plantilla-juego/game.js)
   }
 });
 

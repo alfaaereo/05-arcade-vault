@@ -6,7 +6,6 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const W = canvas.width;
 const H = canvas.height;
-
 // Paleta del tema neón del Vault (app/globals.css). El iframe no ve las variables CSS.
 const C = {
   bg: "#0a0a0f",
@@ -18,7 +17,6 @@ const C = {
   green: "#00ff88",
 };
 const FONT = '"Press Start 2P", monospace';
-
 // ── Entrada ──────────────────────────────────────────────────────────────────
 const keys = {};
 const justPressed = {};
@@ -43,17 +41,14 @@ function pressed(code) {
   justPressed[code] = false;
   return val;
 }
-
 // ── Utilidades ───────────────────────────────────────────────────────────────
 const rand = (min, max) => min + Math.random() * (max - min);
 const MAX_SCORE = 10000000; // límite de la tabla leaderboard (SPEC 06)
-
 // ── Estado ───────────────────────────────────────────────────────────────────
 let state; // 'playing' | 'gameover'
 let score, lives, level, elapsed, hurt;
 let player, orbs, blocks, spawnTimer;
 let lastTime = null;
-
 // ── Modo embebido (iframe de Arcade Vault) ──────────────────────────────────
 // Protocolo postMessage con la plataforma: recibe av:pause | av:resume |
 // av:restart | av:end y envía av:gameover con la puntuación.
@@ -87,9 +82,31 @@ window.addEventListener("message", (e) => {
     clearKeys();
   } else if (type === "av:end") {
     if (state !== "gameover") endGame();
+  } else if (type === "av:key") {
+    pressKey(e.data.code, e.data.down);
   }
 });
-
+// Mando táctil de la plataforma (SPEC 10): av:key se convierte en una tecla
+// sintética que procesan los manejadores de teclado de siempre. Añade aquí
+// cada code que declare `controls` en lib/games.ts (code → key).
+const KEY_OF = {
+  ArrowUp: "ArrowUp",
+  ArrowDown: "ArrowDown",
+  ArrowLeft: "ArrowLeft",
+  ArrowRight: "ArrowRight",
+  Space: " ",
+};
+function pressKey(code, down) {
+  if (!Object.hasOwn(KEY_OF, code)) return;
+  document.dispatchEvent(
+    new KeyboardEvent(down ? "keydown" : "keyup", {
+      code,
+      key: KEY_OF[code],
+      bubbles: true,
+      cancelable: true,
+    }),
+  );
+}
 function initGame() {
   score = 0;
   lives = 3;
@@ -104,7 +121,6 @@ function initGame() {
   paused = false;
   gameOverSent = false;
 }
-
 // ── Lógica ───────────────────────────────────────────────────────────────────
 function update(dt) {
   if (state === "gameover") {
@@ -115,7 +131,6 @@ function update(dt) {
   elapsed += dt;
   level = 1 + Math.floor(elapsed / 20);
   if (hurt > 0) hurt -= dt;
-
   const dx = (keys["ArrowRight"] ? 1 : 0) - (keys["ArrowLeft"] ? 1 : 0);
   const dy = (keys["ArrowDown"] ? 1 : 0) - (keys["ArrowUp"] ? 1 : 0);
   player.x = Math.max(
@@ -126,7 +141,6 @@ function update(dt) {
     80,
     Math.min(H - player.r, player.y + dy * player.speed * dt),
   );
-
   spawnTimer -= dt;
   if (spawnTimer <= 0) {
     spawnTimer = Math.max(0.25, 0.9 - level * 0.08);
@@ -138,7 +152,6 @@ function update(dt) {
   }
   for (const o of orbs) o.y += o.vy * dt;
   for (const b of blocks) b.y += b.vy * dt;
-
   for (const o of orbs) {
     if (Math.hypot(o.x - player.x, o.y - player.y) < o.r + player.r) {
       o.dead = true;
@@ -163,7 +176,6 @@ function update(dt) {
   orbs = orbs.filter((o) => !o.dead && o.y < H + 30);
   blocks = blocks.filter((b) => !b.dead && b.y < H + 50);
 }
-
 // ── Dibujo ───────────────────────────────────────────────────────────────────
 function glow(color, blur) {
   ctx.shadowColor = color;
@@ -219,7 +231,6 @@ function draw() {
   ctx.fillStyle = C.bg;
   ctx.fillRect(0, 0, W, H);
   drawGrid();
-
   glow(C.cyan, 14);
   ctx.fillStyle = C.cyan;
   for (const o of orbs) {
@@ -232,7 +243,6 @@ function draw() {
   ctx.lineWidth = 3;
   for (const b of blocks)
     ctx.strokeRect(b.x - b.s / 2, b.y - b.s / 2, b.s, b.s);
-
   // Nave: parpadea mientras es invulnerable.
   if (!(hurt > 0 && Math.floor(hurt * 10) % 2 === 0)) {
     glow(C.yellow, 16);
@@ -244,12 +254,10 @@ function draw() {
     ctx.closePath();
     ctx.fill();
   }
-
   drawHUD();
   if (state === "gameover" && !EMBEDDED)
     drawOverlay("GAME OVER", `PUNTAJE ${score} — ESPACIO PARA REINICIAR`);
 }
-
 // ── Bucle ────────────────────────────────────────────────────────────────────
 function loop(ts) {
   const dt = lastTime === null ? 0 : Math.min((ts - lastTime) / 1000, 0.05);

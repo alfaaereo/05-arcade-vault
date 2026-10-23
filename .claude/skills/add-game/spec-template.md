@@ -22,6 +22,7 @@
   - Detección de modo embebido (`window.parent !== window`).
   - En modo embebido, al terminar la partida no se muestra {{overlay propio}} ni se reinicia con {{tecla/botón}}. Se envía `av:gameover` una sola vez por partida.
   - En modo embebido, escucha `av:pause`, `av:resume`, `av:restart` y `av:end`. {{Variante: intervalo, pausa propia, sonido, ratón…}}
+  - Adaptador `av:key` (SPEC 10): `pressKey(code, down)` despacha un `KeyboardEvent` sintético; `KEY_OF` incluye {{codes del mando}}.
   - Abierto directamente, el juego se comporta como el original.
 - {{Nueva entrada `{{id}}`al final de`GAMES`| Campo`src`en la entrada existente`{{id}}`}} en `lib/games.ts`.
 - {{Portada: reutiliza `cover-*` | nueva clase `cover-{{id}}`en`app/globals.css`}}.
@@ -31,7 +32,8 @@
 **Fuera de alcance (para specs futuros):**
 
 - {{Reskin del juego, si se conserva el original.}}
-- Controles táctiles y sonido {{si no los tiene ya}}.
+- Sonido {{si no lo tiene ya}}.
+- Gestos táctiles propios del juego (el mando de la plataforma sí entra).
 - Puntuación, vidas o nivel en vivo en la barra de la plataforma.
 - Leaderboard real en `/juegos/{{id}}` (top 10 y récord) y en las tarjetas; `plays` real.
 - Antitrampas más allá de los límites de SPEC 06.
@@ -54,6 +56,10 @@
   best: 0,
   plays: "0",
   src: "/games/{{id}}/index.html",
+  controls: {
+    pad: [{{ { code: "ArrowLeft", dir: "left" }, … }}],
+    buttons: [{{ { code: "Space", label: "ACCIÓN" }, … }}],
+  },
 }
 ```
 
@@ -75,7 +81,7 @@ Convenciones:
 Antes de empezar, leer `specs/05-juego-asteroids-en-iframe.md`, `specs/06-leaderboard-en-supabase.md` y `public/games/asteroids/game.js` como referencia del protocolo. {{Modo nuevo o portada nueva: usar `/frontend-design`, como indica `CLAUDE.md`.}}
 
 1. {{Copiar a `public/games/{{id}}/`los archivos {{lista}} | Crear`public/games/{{id}}/`desde la plantilla de`/add-game`e implementar la mecánica}}. Ajustar el CSS de`index.html`para que el canvas llene la ventana manteniendo 4:3 y añadir`preventDefault`a las teclas del juego. Verificación:`/games/{{id}}/index.html` se juega {{como el original | completo}}, incluido {{su pantalla de fin}}.
-2. Añadir a `game.js` la detección de modo embebido, el listener de `av:pause`/`av:resume`/`av:restart`/`av:end` y el envío único de `av:gameover`. En modo embebido no se muestra {{overlay}} ni se reinicia con {{tecla}}. {{Variantes de la ficha.}} Verificación: abierto directamente sigue igual que en el paso 1.
+2. Añadir a `game.js` la detección de modo embebido, el listener de `av:pause`/`av:resume`/`av:restart`/`av:end`/`av:key` y el envío único de `av:gameover`. En modo embebido no se muestra {{overlay}} ni se reinicia con {{tecla}}. {{Variantes de la ficha.}} Verificación: abierto directamente sigue igual que en el paso 1.
 3. {{Añadir la entrada `{{id}}`al final de`GAMES`| Añadir`src`a la entrada`{{id}}`}}{{ y la clase `cover-{{id}}`}}. Verificación: `/games`muestra la tarjeta,`/juegos/{{id}}`muestra el detalle y`/juegos/{{id}}/jugar` usa el reproductor embebido.
 4. Crear `supabase/migrations/<version>_add_{{id}}_to_games.sql` y aplicarlo con `apply_migration` (nombre `add_{{id}}_to_games`); renombrar el archivo con la versión de `list_migrations`. Verificación: `select * from games` incluye `{{id}}`, `get_advisors` (security) no muestra avisos nuevos, y al terminar una partida y guardar aparece "PUESTO #1" y la fila en la pestaña `{{TITULO}}` de `/salon`.
 
