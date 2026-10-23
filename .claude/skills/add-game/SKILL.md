@@ -94,7 +94,7 @@ Pregunta (en un bloque) la mecánica principal, los controles, cómo se puntúa,
 
 - Se parte de `plantilla-juego/` de este skill: canvas 800×600 (4:3), JS sin dependencias ni build, adaptador `av:*` ya integrado.
 - Aspecto: **tema neón del Vault** (paleta y "Press Start 2P" de `app/globals.css`), HUD dentro del canvas. El spec debe pedir usar `/frontend-design` para el diseño visual del juego.
-- Solo teclado. Sin sonido ni táctil, salvo que el usuario lo pida.
+- Teclado, más el mando táctil de la plataforma (SPEC 10): campo `controls` en `lib/games.ts` y adaptador `av:key` (ya en la plantilla). Sin sonido ni gestos táctiles propios, salvo que el usuario lo pida.
 
 ## Fase 4 — Preguntas
 
@@ -106,7 +106,8 @@ Usa `AskUserQuestion` en bloques de 3 a 5 preguntas. Propón siempre una opción
 4. **Controles propios en modo embebido:** pausa, reinicio y overlays del juego. Por defecto se desactivan en modo embebido porque la plataforma manda (PAUSA/FIN/JUGAR DE NUEVO), y se conservan abierto directamente.
 5. **Aspecto visual** (modo referencia): conservar el original (como SPEC 05) o hacer reskin neón.
 6. **Proporción** (solo si no es 4:3): adaptar el juego a 4:3 o adaptar el reproductor (`.crt-screen` y la fórmula de `max-w` de `EmbeddedGamePlayer` dan 4:3 por hecho).
-7. **Fuera de alcance:** confirma la lista por defecto (sonido, táctil, stats en vivo en la barra, récord real en detalle y tarjetas, `plays` real, antitrampas) y pregunta si hay algo más.
+7. **Mando táctil:** qué direcciones de la cruceta y qué botones (0–4, con etiqueta y `code`) necesita el juego en `controls`, y cuáles repiten al mantenerse (`repeat`). Propón el mínimo que cubra todos los controles del juego.
+8. **Fuera de alcance:** confirma la lista por defecto (sonido, gestos táctiles propios, stats en vivo en la barra, récord real en detalle y tarjetas, `plays` real, antitrampas) y pregunta si hay algo más.
 
 No avances hasta tener respuesta a todos los puntos aplicables.
 

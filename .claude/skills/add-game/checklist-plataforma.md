@@ -66,8 +66,18 @@ Entrada nueva al final de `GAMES` (no altera los 6 juegos de la landing ni la pe
   best: 0,
   plays: "0",
   src: "/games/{{id}}/index.html",
+  // Mando táctil (SPEC 10): solo las direcciones y botones (0–4) que usa el juego.
+  controls: {
+    pad: [
+      { code: "ArrowLeft", dir: "left" },
+      { code: "ArrowRight", dir: "right" },
+    ],
+    buttons: [{ code: "Space", label: "{{ACCIÓN}}" }],
+  },
 }
 ```
+
+`controls` declara el mando táctil que la plataforma superpone al CRT en pantallas táctiles: `pad` son las direcciones de la cruceta (`dir`: `up` | `down` | `left` | `right`) y `buttons` los botones en rombo (1.º abajo, 2.º derecha, 3.º izquierda, 4.º arriba), cada uno con el `code` que se envía como `av:key`. `repeat: true` repite la tecla al mantenerla (como mover piezas en TETRIS). Cada `code` debe estar en `KEY_OF` del `game.js`. Sin `controls`, en táctil se muestra "REQUIERE TECLADO".
 
 O, si el usuario lo elige, añadir solo `src` a la entrada simulada existente (conserva id, URL y textos; `best`/`plays` pasan a `0`/`"0"` si se decide).
 
