@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <title>Asteroids</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!-- Fuente pixel de las skins neon y retro (cae en monospace sin red). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; overflow: hidden; }
@@ -19,6 +23,14 @@
       width: min(100vw, calc(100vh * 4 / 3));
       height: min(100vh, calc(100vw * 3 / 4));
     }
+    /* Skins (contrato av:skin): el fondo de la página acompaña al del canvas. */
+    html[data-skin="clasico"][data-mode="claro"] body { background: #f2efe6; }
+    html[data-skin="neon"][data-mode="oscuro"] body { background: #0a0a0f; }
+    html[data-skin="neon"][data-mode="claro"] body { background: #eef0fa; }
+    html[data-skin="retro"][data-mode="oscuro"] body { background: #071108; }
+    html[data-skin="retro"][data-mode="claro"] body { background: #9bbc0f; }
+    /* Retro: píxel duro también al escalar el canvas. */
+    html[data-skin="retro"] canvas { image-rendering: pixelated; }
   </style>
 </head>
 <body>

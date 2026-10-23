@@ -1,0 +1,1 @@
+- [Sesiones y sugerencias](sesiones-y-sugerencias.md) — candidatos propuestos por sesión, recomendado, decisiones y huecos del catálogo

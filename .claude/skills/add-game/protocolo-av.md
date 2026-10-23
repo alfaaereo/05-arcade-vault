@@ -9,7 +9,12 @@ type ParentToGame =
   | { type: "av:pause" } // congela update(); el canvas sigue mostrando el último frame
   | { type: "av:resume" } // reanuda sin salto de dt
   | { type: "av:restart" } // nueva partida desde cero (score 0, nivel 1, vidas iniciales)
-  | { type: "av:end" }; // fuerza el fin de partida y responde av:gameover
+  | { type: "av:end" } // fuerza el fin de partida y responde av:gameover
+  | {
+      type: "av:skin";
+      skin: "clasico" | "neon" | "retro";
+      mode: "oscuro" | "claro";
+    }; // solo cambia el dibujo
 
 type GameToParent = { type: "av:gameover"; score: number }; // una sola vez por partida
 ```
@@ -18,6 +23,7 @@ type GameToParent = { type: "av:gameover"; score: number }; // una sola vez por 
 - El padre envía con `targetOrigin = window.location.origin` y solo acepta mensajes con `event.source === iframe.contentWindow` y `event.origin === window.location.origin`.
 - El juego envía con `targetOrigin = location.origin` y solo acepta mensajes con `event.source === window.parent` y `event.origin === location.origin`.
 - El padre llama a `iframe.contentWindow.focus()` tras cargar, tras `av:resume` y tras `av:restart`. El juego no necesita pedir el foco.
+- `av:skin { skin, mode }`: la plataforma lo envía al cargar el iframe (también si carga antes de la hidratación) y cada vez que se pulsan los botones `SKIN · …` (cíclico CLÁSICO → NEÓN → RETRO) y `MODO · …` (OSCURO ↔ CLARO), activos en pausa y con el modal abierto. La elección se guarda por juego en `localStorage` (`av_skin_<id>`, JSON `{ skin, mode }`). El juego aplica la paleta con `applySkin(skin, mode)` sin pausar, reiniciar ni tocar la puntuación; valores desconocidos caen en `clasico`/`oscuro`. Abierto directamente, el juego lee `?skin=&mode=` de la URL. Un juego sin skins ignora el mensaje. Contrato completo y estado por juego: `.claude/agents/skin-designer.md` y `references/templates/game-width-themes.md`; referencia: `public/games/asteroids/game.js`.
 - `score` debe ser un **entero entre 0 y 10.000.000** (`MAX_SCORE` en `lib/save-score.ts`; la BD lo impone con un `check`). Si el juego puede dar decimales o pasarse, envía `Math.min(Math.floor(score), 10_000_000)` y documéntalo como decisión en el spec.
 
 ## Modo embebido vs. abierto directamente
