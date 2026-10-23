@@ -1,6 +1,6 @@
 # SPEC 10 — Controles táctiles para jugar en móvil
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 05, SPEC 07, SPEC 08, SPEC 09
 > **Fecha:** 2026-10-22
 > **Objetivo:** Que los juegos embebidos se puedan jugar en una pantalla táctil con un mando virtual que la plataforma superpone al CRT y que traduce los toques en teclas para el juego.
