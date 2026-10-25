@@ -2,7 +2,9 @@
 // FROGGER para Arcade Vault: la rana salta celda a celda, cruza la carretera y el
 // río y llena las 5 bocas de arriba. Protocolo av:* de la plantilla de /add-game.
 const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+// ctx es el contexto en el que dibujan todas las funciones de dibujo; paintOn() lo
+// redirige un momento a un lienzo fuera de pantalla para cachear capas (SPEC 12).
+let ctx = canvas.getContext("2d");
 const W = canvas.width;
 const H = canvas.height;
 // Tablero: franja de HUD de 40 px arriba y 16×14 celdas de 40 px centradas debajo.
@@ -311,11 +313,18 @@ const SKINS = {
   },
 };
 let C = CLASICO_OSCURO;
+// Fondo estático de la skin activa, pintado una vez (SPEC 12). null = hay que rehacerlo.
+let bgLayer = null;
+// Sprites de coches, camiones, troncos y tortugas con su brillo ya pintado (SPEC 12).
+// Clave `${kind}:${ancho}:${sentido}:${variante}`; se vacía al cambiar de skin.
+const sprites = new Map();
 // Solo cambia el dibujo: no pausa, no reinicia ni toca la partida.
 function applySkin(skin, mode) {
   const s = Object.hasOwn(SKINS, skin) ? skin : "clasico";
   const m = mode === "claro" ? "claro" : "oscuro";
   C = SKINS[s][m];
+  bgLayer = null; // las capas cacheadas dependen de la paleta
+  sprites.clear();
   document.documentElement.dataset.skin = s;
   document.documentElement.dataset.mode = m;
 }
@@ -720,6 +729,19 @@ function px(color, x, y, w, h) {
   ctx.fillStyle = color;
   ctx.fillRect(x, y, w, h);
 }
+function makeCanvas(w, h) {
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  return c;
+}
+// Ejecuta fn() dibujando sobre `target` en vez de sobre la pantalla.
+function paintOn(target, fn) {
+  const prev = ctx;
+  ctx = target.getContext("2d");
+  fn();
+  ctx = prev;
+}
 function drawSides() {
   ctx.fillStyle = C.side;
   ctx.fillRect(0, HUD_H, BOARD_X, H - HUD_H);
@@ -764,12 +786,13 @@ function dotRow(row, color) {
     ctx.fillRect(x + (d === 4 ? 12 : 10), y + 28, d, d);
   }
 }
-function drawGoals() {
+// Seto y bocas vacías (capa de fondo).
+function drawGoalSlots() {
   const y = cellY(ROW_GOALS);
   ctx.fillStyle = C.hedge;
   ctx.fillRect(BOARD_X, y, BOARD_W, CELL);
   dotRow(ROW_GOALS, C.hedgeDot);
-  GOAL_COLS.forEach((g, i) => {
+  GOAL_COLS.forEach((g) => {
     const x = cellX(g) + 4;
     if (C.style === "pixel") {
       px(C.goal, x, y + 4, CELL * 2 - 8, CELL - 4);
@@ -786,14 +809,22 @@ function drawGoals() {
       ctx.stroke();
       noGlow();
     }
+  });
+}
+// Ranas de las bocas ocupadas (cambian durante la ronda: se dibujan cada frame).
+function drawGoalFrogs() {
+  const y = cellY(ROW_GOALS);
+  GOAL_COLS.forEach((g, i) => {
     if (goals[i])
       drawFrogAt(cellX(g) + CELL, y + CELL / 2 + 2, "down", 0.85, false);
   });
 }
-function drawRiver() {
-  const y0 = cellY(ROW_RIVER_TOP);
+function drawRiverBase() {
   ctx.fillStyle = C.river;
-  ctx.fillRect(BOARD_X, y0, BOARD_W, CELL * 6);
+  ctx.fillRect(BOARD_X, cellY(ROW_RIVER_TOP), BOARD_W, CELL * 6);
+}
+// Ondas del río: se desplazan con el reloj, así que no van en la capa de fondo.
+function drawRipples() {
   ctx.strokeStyle = C.ripple;
   ctx.lineWidth = 2;
   for (let row = ROW_RIVER_TOP; row <= ROW_RIVER_BOT; row++) {
@@ -880,8 +911,7 @@ function drawLog(x, y, w) {
   ctx.ellipse(x + w - 9, y + CELL / 2, 4, 9, 0, 0, Math.PI * 2);
   ctx.fill();
 }
-function drawTurtlesPx(e, x, y, dir) {
-  const ds = diveState(e);
+function drawTurtlesPx(e, x, y, dir, ds) {
   x = snap(x);
   for (let i = 0; i < e.width; i++) {
     const cx = x + i * CELL + CELL / 2,
@@ -918,9 +948,9 @@ function drawTurtlesPx(e, x, y, dir) {
     px(C.turtleShell, cx + 4, cy - 4, 4, 8);
   }
 }
-function drawTurtles(e, x, y, dir) {
-  if (C.style === "pixel") return drawTurtlesPx(e, x, y, dir);
-  const ds = diveState(e);
+// ds: 0 visible, 1 aviso, 2 sumergida (el sprite lo recibe ya calculado).
+function drawTurtles(e, x, y, dir, ds = diveState(e)) {
+  if (C.style === "pixel") return drawTurtlesPx(e, x, y, dir, ds);
   for (let i = 0; i < e.width; i++) {
     const cx = x + i * CELL + CELL / 2,
       cy = y + CELL / 2;
@@ -1036,22 +1066,51 @@ function drawTruck(x, y, w, dir) {
   ctx.fillStyle = C.style === "wire" ? C.truckCab : C.window;
   ctx.fillRect(dir > 0 ? cabX + cabW - 11 : cabX + 4, y + 13, 7, CELL - 26);
 }
+// Dibuja una entidad en (x, y). kind: log | turtle | truck | racer | car | car2.
+function drawEntity(kind, x, y, w, dir, variant) {
+  if (kind === "log") drawLog(x, y, w);
+  else if (kind === "turtle")
+    drawTurtles({ width: w / CELL }, x, y, dir, variant);
+  else if (kind === "truck") drawTruck(x, y, w, dir);
+  else if (kind === "racer") drawCar(x, y, w, C.racer, dir, "racer");
+  else drawCar(x, y, w, kind === "car" ? C.car : C.car2, dir, kind);
+}
+// Margen del sprite para que quepa el brillo (shadowBlur máximo 8 × glow 1,3 ≈ 10,4).
+// Múltiplo de 4 para que en retro siga la rejilla.
+const SPRITE_PAD = 16;
+function spriteFor(kind, width, dir, variant) {
+  const key = `${kind}:${width}:${dir}:${variant}`;
+  let img = sprites.get(key);
+  if (img) return img;
+  const w = width * CELL;
+  img = makeCanvas(w + SPRITE_PAD * 2, CELL + SPRITE_PAD * 2);
+  paintOn(img, () => {
+    ctx.translate(SPRITE_PAD, SPRITE_PAD);
+    drawEntity(kind, 0, 0, w, dir, variant);
+  });
+  sprites.set(key, img);
+  return img;
+}
 function drawLanes() {
   ctx.save();
   ctx.beginPath();
   ctx.rect(BOARD_X, HUD_H, BOARD_W, ROWS * CELL);
   ctx.clip();
+  const pixel = C.style === "pixel";
   for (const lane of lanes) {
     const y = cellY(lane.row);
     for (const e of lane.entities) {
+      const kind =
+        e.type === "car" ? (lane.row === 10 ? "car" : "car2") : e.type;
+      const variant = e.type === "turtle" ? diveState(e) : 0;
+      const img = spriteFor(kind, e.width, lane.dir, variant);
+      // Coordenada entera (o en la rejilla de 4 px en retro) para no emborronar el sprite.
       const x = cellX(e.col);
-      const w = e.width * CELL;
-      if (e.type === "log") drawLog(x, y, w);
-      else if (e.type === "turtle") drawTurtles(e, x, y, lane.dir);
-      else if (e.type === "truck") drawTruck(x, y, w, lane.dir);
-      else if (e.type === "racer") drawCar(x, y, w, C.racer, lane.dir, "racer");
-      else if (lane.row === 10) drawCar(x, y, w, C.car, lane.dir, "car");
-      else drawCar(x, y, w, C.car2, lane.dir, "car2");
+      ctx.drawImage(
+        img,
+        (pixel ? snap(x) : Math.round(x)) - SPRITE_PAD,
+        y - SPRITE_PAD,
+      );
     }
   }
   ctx.restore();
@@ -1238,17 +1297,28 @@ function drawOverlay(title, sub) {
   ctx.font = `12px ${FONT}`;
   ctx.fillText(sub, W / 2, H / 2 + 28);
 }
+// Todo lo que no se mueve, en un lienzo de 800×600 que se copia con un solo drawImage.
+function buildBgLayer() {
+  const layer = makeCanvas(W, H);
+  paintOn(layer, () => {
+    ctx.fillStyle = C.bg;
+    ctx.fillRect(0, 0, W, H);
+    drawSides();
+    drawGoalSlots();
+    drawRiverBase();
+    drawSafe(ROW_SAFE_MID);
+    drawRoad();
+    drawSafe(ROW_START);
+    drawGrid();
+  });
+  return layer;
+}
 function draw() {
   noGlow();
-  ctx.fillStyle = C.bg;
-  ctx.fillRect(0, 0, W, H);
-  drawSides();
-  drawGoals();
-  drawRiver();
-  drawSafe(ROW_SAFE_MID);
-  drawRoad();
-  drawSafe(ROW_START);
-  drawGrid();
+  if (!bgLayer) bgLayer = buildBgLayer();
+  ctx.drawImage(bgLayer, 0, 0);
+  drawGoalFrogs();
+  drawRipples();
   drawLanes();
   drawFrog();
   drawHUD();

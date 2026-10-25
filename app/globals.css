@@ -633,6 +633,13 @@
     margin: 32px auto;
     padding: 0 24px 64px;
   }
+  /* Con un juego en pantalla la página no se anima ni desenfoca: si no, el navegador
+     la recompone en cada frame del iframe (SPEC 12). El resto del sitio no cambia. */
+  body:has(.av-player) .av-bg::before { animation: none; }
+  body:has(.av-player) .av-nav {
+    backdrop-filter: none;
+    background: linear-gradient(180deg, rgba(10,10,15,0.97), rgba(10,10,15,0.92));
+  }
   .player-hud {
     display: flex; gap: 16px; align-items: center; justify-content: space-between;
     padding: 14px 18px;
@@ -689,9 +696,9 @@
   .crt-screen::after {
     content: "";
     position: absolute; inset: 0;
+    /* Negro al 18 % se ve igual sin mix-blend-mode que con multiply, y así no se mezcla sobre el iframe. */
     background: repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 2px, transparent 2px 4px);
     pointer-events: none;
-    mix-blend-mode: multiply;
   }
   .crt-screen::before {
     content: "";

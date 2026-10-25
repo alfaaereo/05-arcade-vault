@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef } from "react";
 import type { CSSProperties, MouseEvent, PointerEvent } from "react";
 import type { GameColor, TouchControls as Controls } from "@/lib/games";
 // Auto-repetición de las teclas con repeat, como el autorepeat del teclado.
@@ -16,7 +16,8 @@ const DIAMOND = ["bottom", "right", "left", "top"] as const;
 type Key = { code: string; repeat?: boolean };
 // Mando táctil superpuesto al CRT (SPEC 10). Solo se ve con (pointer: coarse); cada toque llega
 // al juego como onKey(code, down). Al desmontarse (pausa, fin) suelta todas las teclas pulsadas.
-export function TouchControls({
+// Sin estado de React: data-pressed se pone en el botón directamente, sin re-render por toque (SPEC 12).
+export const TouchControls = memo(function TouchControls({
   controls,
   color,
   onKey,
@@ -29,7 +30,6 @@ export function TouchControls({
   const held = useRef(new Map<string, Set<number>>());
   const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
   const onKeyRef = useRef(onKey);
-  const [pressed, setPressed] = useState<ReadonlySet<string>>(new Set());
   useEffect(() => {
     onKeyRef.current = onKey;
   }, [onKey]);
@@ -43,7 +43,6 @@ export function TouchControls({
       heldNow.clear();
     };
   }, []);
-  const sync = () => setPressed(new Set(held.current.keys()));
   const press = (key: Key, e: PointerEvent<HTMLButtonElement>) => {
     // Sin preventDefault el toque mueve el foco y el iframe pierde sus teclas (blur).
     e.preventDefault();
@@ -53,6 +52,7 @@ export function TouchControls({
     ids.add(e.pointerId);
     held.current.set(key.code, ids);
     if (!first) return;
+    e.currentTarget.dataset.pressed = "";
     onKeyRef.current(key.code, true);
     if (key.repeat) {
       const tick = (ms: number) =>
@@ -65,7 +65,6 @@ export function TouchControls({
         );
       tick(REPEAT_DELAY);
     }
-    sync();
   };
   const release = (key: Key, e: PointerEvent<HTMLButtonElement>) => {
     const ids = held.current.get(key.code);
@@ -73,8 +72,8 @@ export function TouchControls({
     held.current.delete(key.code);
     clearTimeout(timers.current.get(key.code));
     timers.current.delete(key.code);
+    delete e.currentTarget.dataset.pressed;
     onKeyRef.current(key.code, false);
-    sync();
   };
   const handlers = (key: Key) => ({
     onPointerDown: (e: PointerEvent<HTMLButtonElement>) => press(key, e),
@@ -98,7 +97,6 @@ export function TouchControls({
             tabIndex={-1}
             aria-label={DIR_LABEL[k.dir]}
             className={`tc-arm ${k.dir}`}
-            data-pressed={pressed.has(k.code) || undefined}
             {...handlers(k)}
           >
             <svg viewBox="0 0 10 10" aria-hidden>
@@ -114,7 +112,6 @@ export function TouchControls({
             type="button"
             tabIndex={-1}
             className={`tc-btn ${DIAMOND[i]}`}
-            data-pressed={pressed.has(b.code) || undefined}
             {...handlers(b)}
           >
             {b.label}
@@ -123,4 +120,4 @@ export function TouchControls({
       </div>
     </div>
   );
-}
+});
