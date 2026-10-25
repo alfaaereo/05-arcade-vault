@@ -2,7 +2,8 @@
 // SNAKE para Arcade Vault: la serpiente avanza una celda por tick, come frutas,
 // crece y acelera cada 5 frutas. Protocolo av:* de la plantilla de /add-game.
 const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+// let: paintOn() lo apunta un momento a un lienzo auxiliar para cachear dibujos.
+let ctx = canvas.getContext("2d");
 const W = canvas.width;
 const H = canvas.height;
 // Tablero: franja de HUD de 40 px arriba y 20×14 celdas de 40 px debajo.
@@ -207,6 +208,11 @@ const SKINS = {
 let C = SKINS.clasico.oscuro;
 // Frutas recoloreadas a los tonos de la skin retro (kind → lienzo); se vacía en applySkin.
 let toneFruits = new Map();
+// Cachés de dibujo (rendimiento, como FROGGER en el SPEC 12); se vacían en applySkin:
+// bgLayer = fondo, retícula y pared en reposo; sprites = frutas con su perfil
+// (filter) y bloques de la serpiente con su brillo (shadowBlur) ya pintados.
+let bgLayer = null;
+const sprites = new Map();
 function applySkin(skin, mode) {
   const s = SKINS[skin] ? skin : "clasico";
   const m = mode === "claro" ? "claro" : "oscuro";
@@ -214,6 +220,8 @@ function applySkin(skin, mode) {
   document.documentElement.dataset.skin = s;
   document.documentElement.dataset.mode = m;
   toneFruits = new Map();
+  bgLayer = null;
+  sprites.clear();
   if (document.fonts) document.fonts.load(`14px ${FONT}`).catch(() => {});
 }
 // Abierto directamente: /games/snake/index.html?skin=retro&mode=claro
@@ -477,6 +485,81 @@ function mix(a, b, t) {
     Math.round(((pa >> s) & 255) * (1 - t) + ((pb >> s) & 255) * t);
   return `rgb(${ch(16)}, ${ch(8)}, ${ch(0)})`;
 }
+// ── Cachés de dibujo ─────────────────────────────────────────────────────────
+function makeCanvas(w, h) {
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  return c;
+}
+// Ejecuta fn con ctx apuntando a otro lienzo (las funciones de dibujo usan ctx).
+function paintOn(target, fn) {
+  const prev = ctx;
+  ctx = target.getContext("2d");
+  fn();
+  ctx = prev;
+}
+// Fondo, retícula y pared sin destello, pintados una vez por skin.
+function buildBgLayer() {
+  const layer = makeCanvas(W, H);
+  paintOn(layer, () => {
+    ctx.fillStyle = C.bg;
+    ctx.fillRect(0, 0, W, H);
+    drawBoard(Infinity); // Infinity = sin destello de nivel
+  });
+  return layer;
+}
+// Fruta encajada en la celda con su perfil de modo claro (ctx.filter, muy caro
+// por frame) ya aplicado. Se dibuja en (x - pad, y - pad) de la celda.
+const FRUIT_PAD = 4;
+function fruitSprite(kind, crop) {
+  const key = `fruit:${kind}`;
+  let img = sprites.get(key);
+  if (img) return img;
+  img = makeCanvas(CELL + FRUIT_PAD * 2, CELL + FRUIT_PAD * 2);
+  paintOn(img, () => {
+    const box = CELL - 4;
+    const s = Math.min(box / crop.w, box / crop.h);
+    const dw = crop.w * s;
+    const dh = crop.h * s;
+    ctx.imageSmoothingEnabled = false;
+    if (C.fruitOutline) ctx.filter = C.fruitOutline;
+    ctx.drawImage(
+      fruitImg,
+      crop.x,
+      crop.y,
+      crop.w,
+      crop.h,
+      FRUIT_PAD + (CELL - dw) / 2,
+      FRUIT_PAD + (CELL - dh) / 2,
+      dw,
+      dh,
+    );
+  });
+  sprites.set(key, img);
+  return img;
+}
+// Bloque redondeado de la serpiente con su brillo (glow) ya pintado. El margen
+// cubre el desenfoque de la sombra (≈ 1,5 × shadowBlur).
+function blockSprite(fill, shadow, blur, size, r) {
+  const key = `block:${fill}:${shadow}:${blur}:${size}:${r}`;
+  let sp = sprites.get(key);
+  if (sp) return sp;
+  const pad = Math.ceil(blur * C.glow * 1.5) + 2;
+  const img = makeCanvas(size + pad * 2, size + pad * 2);
+  paintOn(img, () => {
+    if (blur) glow(shadow, blur);
+    ctx.fillStyle = fill;
+    roundRect(pad, pad, size, size, r);
+  });
+  sp = { img, pad };
+  sprites.set(key, sp);
+  return sp;
+}
+function drawBlock(x, y, fill, shadow, blur, size, r) {
+  const sp = blockSprite(fill, shadow, blur, size, r);
+  ctx.drawImage(sp.img, x - sp.pad, y - sp.pad);
+}
 function drawGrid() {
   ctx.fillStyle = C.gridColor;
   const top = HUD_H;
@@ -610,24 +693,8 @@ function drawFruit(now) {
     // 18 px escalados ×2: píxel duro de 2 px.
     ctx.drawImage(tile, x + 2, y + 2, CELL - 4, CELL - 4);
   } else if (fruitImgReady && crop && C.fruitStyle === "sprite") {
-    // Encaja el recorte en la celda manteniendo su proporción, sin suavizado.
-    const box = CELL - 4;
-    const s = Math.min(box / crop.w, box / crop.h);
-    const dw = crop.w * s;
-    const dh = crop.h * s;
-    if (C.fruitOutline) ctx.filter = C.fruitOutline;
-    ctx.drawImage(
-      fruitImg,
-      crop.x,
-      crop.y,
-      crop.w,
-      crop.h,
-      x + (CELL - dw) / 2,
-      y + (CELL - dh) / 2,
-      dw,
-      dh,
-    );
-    ctx.filter = "none";
+    // Recorte encajado en la celda (proporción, sin suavizado), cacheado.
+    ctx.drawImage(fruitSprite(fruit.kind, crop), x - FRUIT_PAD, y - FRUIT_PAD);
   } else {
     glow(C.fruitAlt, 14);
     ctx.fillStyle = C.fruitAlt;
@@ -692,14 +759,12 @@ function drawSnake() {
     ctx.stroke();
     for (let i = n - 1; i >= 1; i--) {
       const s = snake[i];
-      if (!dead) glow(head, 10);
-      ctx.fillStyle = mix(head, tail, Math.min(1, i / Math.max(6, n - 1)));
-      roundRect(cellX(s.x) + 6, cellY(s.y) + 6, CELL - 12, CELL - 12, 6);
+      const fill = mix(head, tail, Math.min(1, i / Math.max(6, n - 1)));
+      const x = cellX(s.x) + 6;
+      drawBlock(x, cellY(s.y) + 6, fill, head, dead ? 0 : 10, CELL - 12, 6);
     }
-    if (!dead) glow(head, 20);
-    ctx.fillStyle = head;
-    roundRect(cellX(hs.x) + 3, cellY(hs.y) + 3, CELL - 6, CELL - 6, 8);
-    ctx.shadowBlur = 0;
+    const hx = cellX(hs.x) + 3;
+    drawBlock(hx, cellY(hs.y) + 3, head, head, dead ? 0 : 20, CELL - 6, 8);
     drawEyes(hs, 6);
     return;
   }
@@ -722,10 +787,8 @@ function drawSnake() {
   ctx.lineWidth = 8;
   body();
   // Cabeza: algo más ancha que el cuerpo.
-  if (!dead) glow(C.head, 18);
-  ctx.fillStyle = head;
-  roundRect(cellX(hs.x) + 3, cellY(hs.y) + 3, CELL - 6, CELL - 6, 11);
-  ctx.shadowBlur = 0;
+  const hx = cellX(hs.x) + 3;
+  drawBlock(hx, cellY(hs.y) + 3, head, C.head, dead ? 0 : 18, CELL - 6, 11);
   drawEyes(hs, 6);
 }
 function drawHUD() {
@@ -787,9 +850,15 @@ function drawScanlines() {
 }
 function draw(now) {
   ctx.shadowBlur = 0;
-  ctx.fillStyle = C.bg;
-  ctx.fillRect(0, 0, W, H);
-  drawBoard(now);
+  if (now - levelFlash < 700) {
+    // Destello de subida de nivel: la pared se pinta en vivo.
+    ctx.fillStyle = C.bg;
+    ctx.fillRect(0, 0, W, H);
+    drawBoard(now);
+  } else {
+    if (!bgLayer) bgLayer = buildBgLayer();
+    ctx.drawImage(bgLayer, 0, 0);
+  }
   drawFruit(now);
   drawSnake();
   drawHUD();

@@ -1,5 +1,7 @@
 const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+// ctx es el contexto en el que dibujan todas las funciones de dibujo; paintOn() lo
+// redirige un momento a un lienzo fuera de pantalla para cachear capas (SPEC 12).
+let ctx = canvas.getContext("2d");
 const PADDLE_SPEED = 400;
 const BLOCK_COLS = 10;
 const BLOCK_W = 64;
@@ -26,6 +28,21 @@ let score = 0;
 let gameState = "playing";
 let currentLevel = 1;
 let isPaused = false;
+// Capas cacheadas (SPEC 12): fondo + retícula + ladrillos vivos, HUD y scanlines.
+// null = hay que rehacerla en el siguiente draw().
+let bgLayer = null;
+let hudLayer = null;
+let hudKey = "";
+let scanLayer = null;
+// Sprites con el brillo incluido (pala y bola neón), por skin.
+const sprites = new Map();
+function resetLayers() {
+  bgLayer = null;
+  hudLayer = null;
+  hudKey = "";
+  scanLayer = null;
+  sprites.clear();
+}
 const keys = { ArrowLeft: false, ArrowRight: false };
 // ── Skins (contrato av:skin) ──────────────────────────────────────────────────
 // El dibujo solo lee la paleta activa C. Todas las paletas tienen las mismas claves.
@@ -189,6 +206,8 @@ let C = SKINS.clasico.oscuro;
 // Silueta del spritesheet en el color de C.outline (contorno del clásico claro).
 let silhouette = null;
 function buildSilhouette() {
+  // Al cambiar de skin o al cargar el spritesheet: las capas dependen de ambos.
+  resetLayers();
   silhouette = null;
   if (!C.outline || !ssLoaded) return;
   const sc = document.createElement("canvas");
@@ -208,8 +227,12 @@ function applySkin(skin, mode) {
   document.documentElement.dataset.skin = s;
   document.documentElement.dataset.mode = m;
   buildSilhouette();
+  // El HUD cacheado se rehace cuando llega la fuente pixel (antes cae en monospace).
   if (C.font === PIXEL && document.fonts)
-    document.fonts.load(PIXEL.hud).catch(() => {});
+    document.fonts
+      .load(PIXEL.hud)
+      .then(() => (hudKey = ""))
+      .catch(() => {});
 }
 // Abierto directamente: /games/arkanoid/index.html?skin=retro&mode=claro
 const params = new URLSearchParams(location.search);
@@ -303,6 +326,7 @@ function loadLevel(n) {
     color: b.color,
     alive: true,
   }));
+  bgLayer = null;
   explosions = [];
   ball.x = paddle.x + (paddle.w - ball.w) / 2;
   ball.y = paddle.y - ball.h;
@@ -406,6 +430,7 @@ function update(dt) {
     if (!block.alive) continue;
     if (collideAABB(block)) {
       block.alive = false;
+      bgLayer = null; // la capa de ladrillos se rehace solo al romper uno
       explosions.push({
         x: block.x,
         y: block.y,
@@ -439,6 +464,37 @@ function update(dt) {
   }
 }
 // ── Dibujo por skin ─────────────────────────────────────────────────────────
+function makeCanvas(w, h) {
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  return c;
+}
+// Ejecuta fn() dibujando sobre `target` en vez de sobre la pantalla.
+function paintOn(target, fn) {
+  const prev = ctx;
+  ctx = target.getContext("2d");
+  fn();
+  ctx = prev;
+}
+// Margen de los sprites para que quepa el brillo (shadowBlur máximo 12).
+const SPRITE_PAD = 24;
+// Sprite de w × h con su brillo dentro, creado bajo demanda: paint() dibuja en (0, 0).
+function spriteFor(key, w, h, paint) {
+  let img = sprites.get(key);
+  if (img) return img;
+  img = makeCanvas(w + SPRITE_PAD * 2, h + SPRITE_PAD * 2);
+  paintOn(img, () => {
+    ctx.translate(SPRITE_PAD, SPRITE_PAD);
+    paint();
+  });
+  sprites.set(key, img);
+  return img;
+}
+// Coordenada entera para que el sprite no se emborrone.
+function blitSprite(img, x, y) {
+  ctx.drawImage(img, Math.round(x) - SPRITE_PAD, Math.round(y) - SPRITE_PAD);
+}
 // Brillo neón: shadowBlur con el color de la figura (0 en las skins sin brillo).
 function glow(color, blur = C.glow) {
   ctx.shadowColor = color;
@@ -565,13 +621,14 @@ function drawPaddle() {
     return;
   }
   if (C.style === "neon") {
-    ctx.save();
-    ctx.fillStyle = C.paddle;
-    glow(C.paddle);
-    ctx.beginPath();
-    ctx.roundRect(paddle.x, paddle.y, paddle.w, paddle.h, paddle.h / 2);
-    ctx.fill();
-    ctx.restore();
+    const img = spriteFor("paddle", paddle.w, paddle.h, () => {
+      ctx.fillStyle = C.paddle;
+      glow(C.paddle);
+      ctx.beginPath();
+      ctx.roundRect(0, 0, paddle.w, paddle.h, paddle.h / 2);
+      ctx.fill();
+    });
+    blitSprite(img, paddle.x, paddle.y);
     return;
   }
   // Retro: pala de 3 píxeles de alto con los extremos redondeados y dos bandas.
@@ -592,13 +649,14 @@ function drawBall(x, y, size) {
     return;
   }
   if (C.style === "neon") {
-    ctx.save();
-    ctx.fillStyle = C.ball;
-    glow(C.ball);
-    ctx.beginPath();
-    ctx.arc(x + size / 2, y + size / 2, size / 2 - 1, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    const img = spriteFor("ball:" + size, size, size, () => {
+      ctx.fillStyle = C.ball;
+      glow(C.ball);
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    blitSprite(img, x, y);
     return;
   }
   // Retro: bola de 4 × 4 píxeles sin las esquinas.
@@ -701,16 +759,47 @@ function drawHUD() {
     drawBall(bx, 10, ballSize);
   }
 }
+// Fondo, retícula y ladrillos vivos en un lienzo de 800×600 que se copia con un
+// solo drawImage. Se rehace al romper un ladrillo, al cargar nivel y al cambiar de skin.
+function buildBgLayer() {
+  const layer = makeCanvas(canvas.width, canvas.height);
+  paintOn(layer, () => {
+    ctx.fillStyle = C.bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (C.grid) drawGrid();
+    for (const block of blocks) if (block.alive) drawBlock(block);
+  });
+  return layer;
+}
+// HUD (texto con brillo y vidas) en una franja transparente que solo se rehace
+// cuando cambian la puntuación, el nivel o las vidas.
+const HUD_LAYER_H = 80;
+function drawCachedHUD() {
+  const key = score + "|" + currentLevel + "|" + lives;
+  if (!hudLayer || key !== hudKey) {
+    hudLayer = hudLayer || makeCanvas(canvas.width, HUD_LAYER_H);
+    hudLayer.getContext("2d").clearRect(0, 0, canvas.width, HUD_LAYER_H);
+    paintOn(hudLayer, drawHUD);
+    hudKey = key;
+  }
+  ctx.drawImage(hudLayer, 0, 0);
+}
+// Scanlines de retro: fijas, en un lienzo transparente que va encima de todo.
+function drawCachedScanlines() {
+  if (!scanLayer) {
+    scanLayer = makeCanvas(canvas.width, canvas.height);
+    paintOn(scanLayer, drawScanlines);
+  }
+  ctx.drawImage(scanLayer, 0, 0);
+}
 function draw() {
-  ctx.fillStyle = C.bg;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  if (C.grid) drawGrid();
-  for (const block of blocks) if (block.alive) drawBlock(block);
+  if (!bgLayer) bgLayer = buildBgLayer();
+  ctx.drawImage(bgLayer, 0, 0);
   for (const exp of explosions) drawExplosion(exp);
   drawPaddle();
   drawBall(ball.x, ball.y, ball.w);
-  if (gameState === "playing") drawHUD();
-  if (C.scan) drawScanlines();
+  if (gameState === "playing") drawCachedHUD();
+  if (C.scan) drawCachedScanlines();
   // Embebido, el cierre de partida y la pausa los muestra la plataforma.
   if (EMBEDDED) return;
   if (gameState === "gameover") drawOverlay("GAME OVER");
