@@ -25,6 +25,12 @@
         width: min(100vw, calc(100vh * 4 / 3));
         height: min(100vh, calc(100vw * 3 / 4));
       }
+      /* Fondo de la ventana según la skin (contrato av:skin, ver game.js). */
+      html[data-skin="clasico"][data-mode="claro"] body { background: #f2f3f7; }
+      html[data-skin="neon"][data-mode="claro"] body { background: #eef0fa; }
+      html[data-skin="retro"][data-mode="oscuro"] body { background: #071108; }
+      html[data-skin="retro"][data-mode="claro"] body { background: #9bbc0f; }
+      html[data-skin="retro"] canvas { image-rendering: pixelated; }
     </style>
   </head>
   <body>
