@@ -1,6 +1,6 @@
 # SPEC 12 — Rendimiento del reproductor y del canvas de FROGGER
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 05, SPEC 10, spec de FROGGER (`specs/game-jam/frogger/01-frogger-core.md`)
 > **Fecha:** 2026-10-24
 > **Objetivo:** Subir los FPS de los juegos dentro de `/juegos/<id>/jugar` con tres cambios: congelar los efectos CSS de la página mientras hay un juego en pantalla, cachear el dibujo estático de FROGGER en canvas fuera de pantalla y quitar los re-renders de React por cada toque del mando táctil.
