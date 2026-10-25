@@ -190,12 +190,12 @@ FPS, mediana de 3 tomas de 3 s con el fragmento del Modelo de datos, en el naveg
 
 | Juego     | Skin           | Directo (antes) | Reproductor (antes) | Tras paso 2 | Reproductor (después) |
 | --------- | -------------- | --------------- | ------------------- | ----------- | --------------------- |
-| FROGGER   | clásico oscuro | 60              | 39                  |             |                       |
-| FROGGER   | clásico claro  | 59              | 39                  |             |                       |
-| FROGGER   | neón oscuro    | 55              | 27                  |             |                       |
-| FROGGER   | neón claro     | 57              | 27                  |             |                       |
-| FROGGER   | retro oscuro   | 60              | 46                  |             |                       |
-| FROGGER   | retro claro    | 60              | 47                  |             |                       |
+| FROGGER   | clásico oscuro | 60              | 39                  | 60          |                       |
+| FROGGER   | clásico claro  | 59              | 39                  | 60          |                       |
+| FROGGER   | neón oscuro    | 55              | 27                  | 46          |                       |
+| FROGGER   | neón claro     | 57              | 27                  | 42          |                       |
+| FROGGER   | retro oscuro   | 60              | 46                  | 60          |                       |
+| FROGGER   | retro claro    | 60              | 47                  | 60          |                       |
 | ASTEROIDS | clásico oscuro | —               | 56                  |             |                       |
 | ASTEROIDS | clásico claro  | —               | 55                  |             |                       |
 | ASTEROIDS | neón oscuro    | —               | 49                  |             |                       |
@@ -208,12 +208,12 @@ FPS, mediana de 3 tomas de 3 s con el fragmento del Modelo de datos, en el naveg
 | ARKANOID  | neón claro     | —               | 42                  |             |                       |
 | ARKANOID  | retro oscuro   | —               | 50                  |             |                       |
 | ARKANOID  | retro claro    | —               | 53                  |             |                       |
-| SNAKE     | clásico oscuro | —               | 45                  |             |                       |
-| SNAKE     | clásico claro  | —               | 44                  |             |                       |
-| SNAKE     | neón oscuro    | —               | 56                  |             |                       |
-| SNAKE     | neón claro     | —               | 51                  |             |                       |
-| SNAKE     | retro oscuro   | —               | 57                  |             |                       |
-| SNAKE     | retro claro    | —               | 59                  |             |                       |
+| SNAKE     | clásico oscuro | —               | 45                  | 60          |                       |
+| SNAKE     | clásico claro  | —               | 44                  | 60          |                       |
+| SNAKE     | neón oscuro    | —               | 56                  | 60          |                       |
+| SNAKE     | neón claro     | —               | 51                  | 60          |                       |
+| SNAKE     | retro oscuro   | —               | 57                  | 60          |                       |
+| SNAKE     | retro claro    | —               | 59                  | 60          |                       |
 | TETRIS    | clásico oscuro | —               | 59                  |             |                       |
 
 Referencia táctil de FROGGER en el reproductor (375×812, `hasTouch`/`isMobile`, CPU ×4), antes: clásico oscuro 23, neón oscuro 21, retro oscuro 34. Después: pendiente.
