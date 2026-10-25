@@ -128,8 +128,8 @@ Muestra:
 
 Siguientes pasos:
   1. Revísalo y cambia el estado a "Aprobado" (lo hace la persona, no el agente).
-  2. Ejecuta /spec-impl-game NN-juego-<id> (implementa el spec y luego lanza en serie skin-designer y mobile-porte).
-     Alternativa manual: /spec-impl NN-juego-<id> y después pide a skin-designer sus skins y a mobile-porte "porta <id> a móvil".
+  2. Ejecuta /spec-impl-game NN-juego-<id> (implementa el spec y luego lanza en serie skin-designer, mobile-porte y game-performance-booster).
+     Alternativa manual: /spec-impl NN-juego-<id> y después pide a skin-designer sus skins, a mobile-porte "porta <id> a móvil" y a game-performance-booster "revisa el rendimiento de <id>".
 ```
 
 No hagas nada más.
