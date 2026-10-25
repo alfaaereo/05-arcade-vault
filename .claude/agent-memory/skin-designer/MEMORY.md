@@ -27,6 +27,9 @@ Aprendizajes reutilizables entre encargos: paletas que funcionaron, técnicas pa
 - Juego por ticks con acumulador: congelar con `acc = -Infinity` (sigue dibujando, nunca avanza) sin activar la pausa que pinta overlay.
 - Sprites a color en retro (frutas de `snake`): reducir el recorte a ~18×18 en un lienzo aparte, mapear cada píxel opaco por luminancia a los tonos 1–3 (invertida en modo claro; umbrales 0,2 / 0,55) y cachear por sprite (vaciar en `applySkin`); dibujar ×2 sin suavizado. Envolver en `try/catch` (lienzo contaminado en `file://`) con un bloque de reserva.
 - Sprites claros sobre fondo claro, versión barata: `ctx.filter = "drop-shadow(0 0 1px <tinta>)"` solo al dibujar el sprite y `"none"` después.
+- Neón cuando el clásico ya es neón (p. ej. `frogger`): "todo en trazo menos el jugador" (entidades con trazo brillante + relleno al 22 %, jugador sólido) + retícula de celdas. Helper `body(color, blur, solid)` que rellena el trazado actual según `C.style` (`solid`/`wire`/`pixel`) y aplica `C.outline`; `glow()` multiplica por `C.glow` para que el clásico oscuro no cambie.
+- Personaje retro sin imagen: bitmap 8×8 como array de strings (`B` cuerpo, `D` patas, `E` ojos) dibujado con `fillRect` de 4 px y rotado por índices (abajo `7-x,7-y`; derecha `y,7-x`; izquierda `7-y,x`); 2.º bitmap para el salto. Lee mucho mejor que reducir el dibujo vectorial.
+- Retro sin color de alarma (barra de tiempo verde→rojo): hacer parpadear el tramo final con `Math.floor(clock * 4) % 2`.
 - Si la skin clásica ya es neón del Vault (p. ej. `snake`), la skin `neon` necesita otra forma, no solo otros colores: cambiar el estilo del jugador (tubo → bloques de luz), la retícula (puntos → líneas) y el color del jugador.
 
 ## Trampas
@@ -42,3 +45,5 @@ Aprendizajes reutilizables entre encargos: paletas que funcionaron, técnicas pa
 - Los nombres de color de un spritesheet pueden no ser su tono real (arkanoid: `cyan` es verde azulado, `green` azul, `hotpink` naranja): mirar la captura del clásico antes de mapear colores de neón.
 - El hook de ESLint (`--max-warnings 0`) bloquea por avisos previos del original (constantes sin uso) en cuanto se reescribe el archivo: quitarlas si no afectan a la mecánica.
 - Navegador de Playwright compartido con otros agentes: la URL y el tamaño del viewport pueden cambiar entre llamadas. Navegar y evaluar comprobando `location.href` en la misma tanda y capturar con `target: "canvas"` en lugar del viewport.
+- Retro claro: un elemento en el tono 0 sobre un campo en el tono 1 (río, carretera) da 1,20 y desaparece; usar el tono 2 o un contorno en el tono 3.
+- Textos con comillas invertidas dentro de `node -e "…"` en Bash se ejecutan como sustitución de comandos y se pierden: escribir el texto con un heredoc `<<'EOF'` a un archivo o usar `node - <<'EOF'`.
