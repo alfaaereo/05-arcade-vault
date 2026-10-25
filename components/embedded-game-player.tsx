@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { GameOverModal } from "@/components/game-over-modal";
 import { TouchControls } from "@/components/touch-controls";
 import type { Game } from "@/lib/games";
@@ -45,6 +45,13 @@ export function EmbeddedGamePlayer({ game }: { game: Game & { src: string } }) {
   const send = (msg: ParentToGame) => {
     frameRef.current?.contentWindow?.postMessage(msg, window.location.origin);
   };
+  // Estable entre renders: TouchControls (memo) no se re-renderiza al cambiar SKIN o MODO.
+  const sendKey = useCallback((code: string, down: boolean) => {
+    frameRef.current?.contentWindow?.postMessage(
+      { type: "av:key", code, down } satisfies ParentToGame,
+      window.location.origin,
+    );
+  }, []);
   const sendSkin = (l: { skin: Skin; mode: Mode }) =>
     send({ type: "av:skin", skin: l.skin, mode: l.mode });
   // Devuelve el teclado al juego (tras cargar, reanudar o reiniciar).
@@ -162,7 +169,7 @@ export function EmbeddedGamePlayer({ game }: { game: Game & { src: string } }) {
             <TouchControls
               controls={game.controls}
               color={game.color}
-              onKey={(code, down) => send({ type: "av:key", code, down })}
+              onKey={sendKey}
             />
           )}
           {paused && (
