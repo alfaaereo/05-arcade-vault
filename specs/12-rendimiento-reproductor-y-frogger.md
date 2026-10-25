@@ -186,11 +186,39 @@ Convenciones de medición:
 
 ## Mediciones
 
-_Se rellena durante la implementación (pasos 1, 2 y 6)._
+FPS, mediana de 3 tomas de 3 s con el fragmento del Modelo de datos, en el navegador de Playwright a 1280×900. Línea base del 2026-10-25 (paso 1). La columna "Tras paso 2" es FROGGER antes de tocar su canvas.
 
-| Juego   | Skin           | Directo (antes) | Reproductor (antes) | Reproductor (después) |
-| ------- | -------------- | --------------- | ------------------- | --------------------- |
-| FROGGER | clásico oscuro |                 |                     |                       |
+| Juego     | Skin           | Directo (antes) | Reproductor (antes) | Tras paso 2 | Reproductor (después) |
+| --------- | -------------- | --------------- | ------------------- | ----------- | --------------------- |
+| FROGGER   | clásico oscuro | 60              | 39                  |             |                       |
+| FROGGER   | clásico claro  | 59              | 39                  |             |                       |
+| FROGGER   | neón oscuro    | 55              | 27                  |             |                       |
+| FROGGER   | neón claro     | 57              | 27                  |             |                       |
+| FROGGER   | retro oscuro   | 60              | 46                  |             |                       |
+| FROGGER   | retro claro    | 60              | 47                  |             |                       |
+| ASTEROIDS | clásico oscuro | —               | 56                  |             |                       |
+| ASTEROIDS | clásico claro  | —               | 55                  |             |                       |
+| ASTEROIDS | neón oscuro    | —               | 49                  |             |                       |
+| ASTEROIDS | neón claro     | —               | 47                  |             |                       |
+| ASTEROIDS | retro oscuro   | —               | 52                  |             |                       |
+| ASTEROIDS | retro claro    | —               | 52                  |             |                       |
+| ARKANOID  | clásico oscuro | —               | 53                  |             |                       |
+| ARKANOID  | clásico claro  | —               | 55                  |             |                       |
+| ARKANOID  | neón oscuro    | —               | 40                  |             |                       |
+| ARKANOID  | neón claro     | —               | 42                  |             |                       |
+| ARKANOID  | retro oscuro   | —               | 50                  |             |                       |
+| ARKANOID  | retro claro    | —               | 53                  |             |                       |
+| SNAKE     | clásico oscuro | —               | 45                  |             |                       |
+| SNAKE     | clásico claro  | —               | 44                  |             |                       |
+| SNAKE     | neón oscuro    | —               | 56                  |             |                       |
+| SNAKE     | neón claro     | —               | 51                  |             |                       |
+| SNAKE     | retro oscuro   | —               | 57                  |             |                       |
+| SNAKE     | retro claro    | —               | 59                  |             |                       |
+| TETRIS    | clásico oscuro | —               | 59                  |             |                       |
+
+Referencia táctil de FROGGER en el reproductor (375×812, `hasTouch`/`isMobile`, CPU ×4), antes: clásico oscuro 23, neón oscuro 21, retro oscuro 34. Después: pendiente.
+
+Capturas de FROGGER con escena congelada y determinista (semilla fija de `Math.random`, `update()` anulado, `clock = 1.7`, bocas 2 y 4 ocupadas, rana en la fila 3): `.playwright-screenshots/perf/frogger-<skin>-<modo>-antes.png`.
 
 ## Lo que **no** entra en este spec
 
