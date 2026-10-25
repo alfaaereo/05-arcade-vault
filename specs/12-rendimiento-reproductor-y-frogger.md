@@ -186,39 +186,57 @@ Convenciones de medición:
 
 ## Mediciones
 
-FPS, mediana de 3 tomas de 3 s con el fragmento del Modelo de datos, en el navegador de Playwright a 1280×900. Línea base del 2026-10-25 (paso 1). La columna "Tras paso 2" es FROGGER antes de tocar su canvas.
+FPS, mediana de 3 tomas de 3 s con el fragmento del Modelo de datos, en el navegador de Playwright a 1280×900. Línea base del 2026-10-25 (paso 1). La columna "Tras paso 2" es FROGGER (y SNAKE) antes de tocar el canvas de FROGGER. "Reproductor (después)" es la tanda final del paso 6. Después de esa tanda, FROGGER directo dio 60 en las 6 skins.
 
 | Juego     | Skin           | Directo (antes) | Reproductor (antes) | Tras paso 2 | Reproductor (después) |
 | --------- | -------------- | --------------- | ------------------- | ----------- | --------------------- |
-| FROGGER   | clásico oscuro | 60              | 39                  | 60          |                       |
-| FROGGER   | clásico claro  | 59              | 39                  | 60          |                       |
-| FROGGER   | neón oscuro    | 55              | 27                  | 46          |                       |
-| FROGGER   | neón claro     | 57              | 27                  | 42          |                       |
-| FROGGER   | retro oscuro   | 60              | 46                  | 60          |                       |
-| FROGGER   | retro claro    | 60              | 47                  | 60          |                       |
-| ASTEROIDS | clásico oscuro | —               | 56                  |             |                       |
-| ASTEROIDS | clásico claro  | —               | 55                  |             |                       |
-| ASTEROIDS | neón oscuro    | —               | 49                  |             |                       |
-| ASTEROIDS | neón claro     | —               | 47                  |             |                       |
-| ASTEROIDS | retro oscuro   | —               | 52                  |             |                       |
-| ASTEROIDS | retro claro    | —               | 52                  |             |                       |
-| ARKANOID  | clásico oscuro | —               | 53                  |             |                       |
-| ARKANOID  | clásico claro  | —               | 55                  |             |                       |
-| ARKANOID  | neón oscuro    | —               | 40                  |             |                       |
-| ARKANOID  | neón claro     | —               | 42                  |             |                       |
-| ARKANOID  | retro oscuro   | —               | 50                  |             |                       |
-| ARKANOID  | retro claro    | —               | 53                  |             |                       |
-| SNAKE     | clásico oscuro | —               | 45                  | 60          |                       |
-| SNAKE     | clásico claro  | —               | 44                  | 60          |                       |
-| SNAKE     | neón oscuro    | —               | 56                  | 60          |                       |
-| SNAKE     | neón claro     | —               | 51                  | 60          |                       |
-| SNAKE     | retro oscuro   | —               | 57                  | 60          |                       |
-| SNAKE     | retro claro    | —               | 59                  | 60          |                       |
-| TETRIS    | clásico oscuro | —               | 59                  |             |                       |
+| FROGGER   | clásico oscuro | 60              | 39                  | 60          | 57                    |
+| FROGGER   | clásico claro  | 59              | 39                  | 60          | 60                    |
+| FROGGER   | neón oscuro    | 55              | 27                  | 46          | 53                    |
+| FROGGER   | neón claro     | 57              | 27                  | 42          | 60                    |
+| FROGGER   | retro oscuro   | 60              | 46                  | 60          | 60                    |
+| FROGGER   | retro claro    | 60              | 47                  | 60          | 60                    |
+| ASTEROIDS | clásico oscuro | —               | 56                  |             | 60                    |
+| ASTEROIDS | clásico claro  | —               | 55                  |             | 60                    |
+| ASTEROIDS | neón oscuro    | —               | 49                  |             | 50                    |
+| ASTEROIDS | neón claro     | —               | 47                  |             | 55                    |
+| ASTEROIDS | retro oscuro   | —               | 52                  |             | 60                    |
+| ASTEROIDS | retro claro    | —               | 52                  |             | 60                    |
+| ARKANOID  | clásico oscuro | —               | 53                  |             | 59                    |
+| ARKANOID  | clásico claro  | —               | 55                  |             | 60                    |
+| ARKANOID  | neón oscuro    | —               | 40                  |             | 44                    |
+| ARKANOID  | neón claro     | —               | 42                  |             | 56                    |
+| ARKANOID  | retro oscuro   | —               | 50                  |             | 60                    |
+| ARKANOID  | retro claro    | —               | 53                  |             | 60                    |
+| SNAKE     | clásico oscuro | —               | 45                  | 60          | 58                    |
+| SNAKE     | clásico claro  | —               | 44                  | 60          | 60                    |
+| SNAKE     | neón oscuro    | —               | 56                  | 60          | 60                    |
+| SNAKE     | neón claro     | —               | 51                  | 60          | 60                    |
+| SNAKE     | retro oscuro   | —               | 57                  | 60          | 60                    |
+| SNAKE     | retro claro    | —               | 59                  | 60          | 60                    |
+| TETRIS    | clásico oscuro | —               | 59                  |             | 60                    |
 
-Referencia táctil de FROGGER en el reproductor (375×812, `hasTouch`/`isMobile`, CPU ×4), antes: clásico oscuro 23, neón oscuro 21, retro oscuro 34. Después: pendiente.
+Notas de la medición final:
 
-Capturas de FROGGER con escena congelada y determinista (semilla fija de `Math.random`, `update()` anulado, `clock = 1.7`, bocas 2 y 4 ocupadas, rana en la fila 3): `.playwright-screenshots/perf/frogger-<skin>-<modo>-antes.png`.
+- **El ruido del entorno es alto.** La misma configuración varió entre 42 y 60 FPS de una sesión a otra mientras el equipo tenía otra carga. Por eso los efectos de los pasos 4–5 se midieron también en A/B dentro de la misma sesión: el reproductor con el `draw()` nuevo frente al `draw()` original, inyectado en el iframe.
+- **A/B de los pasos 4–5 en el reproductor.** Neón oscuro: 57 frente a 32. Clásico oscuro: 60 frente a 45. Con el fondo cacheado y sin sprites, el A/B salió igual (33 frente a 33): el coste estaba en el brillo de las entidades, no en el fondo.
+- **Neón oscuro (53 en la tabla).** Al repetirlo en la misma página dio 60, 59 y 58. Clásico oscuro (57) dio 55 y 60. El 53 queda por debajo de 55 en una sola tanda, así que el criterio de ≥ 55 se cumple en todas salvo esa tanda.
+- **Otros juegos.** Mejoran solo con el paso 2. Los que siguen por debajo de 55 son ASTEROIDS neón oscuro (50) y ARKANOID neón oscuro (44), por el `shadowBlur` de su canvas. Quedan fuera de alcance, para su propio spec.
+
+Referencia táctil de FROGGER en el reproductor (375×812, `hasTouch`/`isMobile`, CPU ×4):
+
+| Skin           | Antes | Después |
+| -------------- | ----- | ------- |
+| clásico oscuro | 23    | 32      |
+| neón oscuro    | 21    | 32      |
+| retro oscuro   | 34    | 36      |
+
+Capturas de FROGGER con escena congelada y determinista (semilla fija de `Math.random`, `update()` anulado, `clock = 1.7`, bocas 2 y 4 ocupadas, rana en la fila 3):
+
+- `.playwright-screenshots/perf/frogger-<skin>-<modo>-antes.png`
+- `-paso4.png`: idénticas a las de antes, diferencia máxima de 6 niveles.
+- `-despues.png`: retro idéntico; en clásico y neón difiere ~1 % de los píxeles, solo en bordes, porque los sprites se dibujan en x entera.
+- `comparacion-antes-despues.png`: ampliación lado a lado.
 
 ## Lo que **no** entra en este spec
 

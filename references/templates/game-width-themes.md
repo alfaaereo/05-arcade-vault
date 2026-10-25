@@ -18,7 +18,7 @@ Un juego cumple cuando sus 6 celdas están en ✅.
 | TETRIS    | `tetris`    |       🟡       |      🟡       |     ⬜      |     ⬜     |      ⬜      |     ⬜      | —               |
 | ARKANOID  | `arkanoid`  |       ✅       |      ✅       |     ✅      |     ✅     |      ✅      |     ✅      | 22/10/2026      |
 | SNAKE     | `snake`     |       ✅       |      ✅       |     ✅      |     ✅     |      ✅      |     ✅      | 22/10/2026      |
-| FROGGER   | `frogger`  |       ✅       |      ✅       |     ✅      |     ✅     |      ✅      |     ✅      | 23/10/2026      |
+| FROGGER   | `frogger`  |       ✅       |      ✅       |     ✅      |     ✅     |      ✅      |     ✅      | 25/10/2026      |
 
 Estado inicial (22/10/2026): "Clásico oscuro" es el aspecto actual de cada juego, aún sin el contrato `av:skin`. "Clásico claro" de TETRIS es su toggle LIGHT/DARK propio, que el agente integrará en el contrato.
 
@@ -28,6 +28,7 @@ Un juego nuevo entra en la tabla al final, con todas sus celdas en ⬜, cuando s
 
 Una entrada por encargo, la más reciente arriba: fecha, juego, skins tocadas y notas (paleta elegida, sprites recoloreados, problemas de contraste resueltos).
 
+- 25/10/2026 — `frogger` (SPEC 12, rendimiento): fondo estático cacheado en `bgLayer` y entidades pre-renderizadas con su brillo en sprites (`spriteFor()`), ambos rehechos en `applySkin()`. Las 6 skins se ven igual que antes; capturas en `.playwright-screenshots/perf/`.
 - 23/10/2026 — `frogger`: las 6 celdas (clasico, neon, retro × oscuro, claro). Solo el juego; la plataforma ya enviaba `av:skin`. El juego no tenía fila: se añadió. `C.style` elige la forma (`solid` / `wire` / `pixel`), más los flags `glow` (multiplicador), `fillA`, `outline`, `grid` y `scan`; un helper `body(color, blur, solid)` rellena cada entidad según el estilo.
   - Clásico: oscuro = paleta original intacta (tablero neón del Vault, rana `#00ff88`, troncos `#c8742a`, tortugas `#ff006e`, coches amarillo/magenta/cyan, HUD cyan/amarillo sobre `#0f0f1a`); claro = `#f2f3f7`, río `#9cc3e6`, carretera `#d6d8e2`, troncos claros `#ebb57f`, rana `#00754a`, coches `#7a6c00`/`#c8005a`/`#007f8a`, contorno `#1a1a2e` de 1,5 px en todas las entidades (tronco/río 1,01 sin él), HUD `#006b75`/`#6b5f00` (4,97 y 5,12), brillo ×0,25.
   - Neón: "todo en trazo menos la rana": vehículos, troncos y tortugas en trazo luminoso con relleno al 22 % y retícula de celdas cyan al 7 %; la rana es la única figura sólida. Oscuro = `#0a0a0f`, río `#070b1e` con ondas violeta, rana `#00f5ff`, troncos `#ff8c1a`, tortugas `#00ff88`, peligros `#e8005f`/`#b026ff`/azul `#2a6bff`, bordes de carretera magenta, HUD cyan/`#ff4d9a` con brillo de texto 4, brillo ×1,3; claro = `#eef0fa`, rana `#007f8a`, troncos `#b35900`, tortugas `#00754a`, peligros `#c8005a`/`#6a1fc0`/`#1f4fd0`, relleno 18 %, brillo ×0,25.
