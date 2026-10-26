@@ -36,6 +36,14 @@ La primera LABERINTO VORAZ (2026-10-21, formato antiguo de 3 juegos: `gloton`, `
 - B `contraflujo`: velocidad automática, carriles 3–4 en contramano (×3), nitro con Espacio (×2), sin vidas (choque −30 combustible), 10 tramos de 2 km, meta a 20 km; tráfico CIVIL, CONTRAMANO, KAMIKAZE; máx. 376.100.
 - Archivos: `specs/game-jam/autopista/01-juego-autopista-resistencia.md`, `specs/game-jam/autopista/02-juego-autopista-contraflujo.md`.
 
+### 2026-10-26 — PALAS NEÓN
+
+- Juego: **PALAS NEÓN** (`palas`) · VERSUS · yellow · portada `cover-duelo` reutilizada (ya existía). Sugerencia del game-planner (2026-10-21), usada con id y título exactos por indicación de la tarea. Estrena VERSUS y el amarillo.
+- Concepto: duelo de palas contra la CPU en pista neón 800×536 bajo HUD de 56 px; paso fijo 1/120 s.
+- A `torneo` (recomendada): 8 rivales CPU con nombre, cada uno a 5 tantos, 3 vidas (+1 por victoria), puntuación por golpes, tantos y victorias; solo ↑↓; máx. ~130.000.
+- B `contrarreloj`: un duelo de 120 s, −5 s por tanto encajado, CPU sube de nivel cada 12 s, remate con Espacio, racha ×1–×5; máx. ~60.000.
+- Archivos: `specs/game-jam/palas/01-juego-palas-torneo.md`, `specs/game-jam/palas/02-juego-palas-contrarreloj.md`.
+
 ## IDs usados
 
-- `gloton` (2026-10-22), `autopista` (2026-10-24). Reservado por el game-planner: `laberinto`.
+- `gloton` (2026-10-22), `autopista` (2026-10-24), `palas` (2026-10-26). Reservado por el game-planner: `laberinto`.
