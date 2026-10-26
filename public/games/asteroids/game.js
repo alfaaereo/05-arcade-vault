@@ -140,6 +140,25 @@ const lo = document.createElement("canvas");
 const loCtx = lo.getContext("2d", { willReadFrequently: true });
 // Caché color → tono de quantize() (la mayoría de píxeles repiten color); se vacía en applySkin.
 let toneCache = new Map();
+// Sprites con brillo (skins con C.glow > 0 y sin baja resolución): las rocas y las
+// balas se pintan una vez con su shadowBlur en un canvas pequeño y cada frame se
+// copian con drawImage, en vez de calcular el desenfoque por figura y por frame.
+let skinGen = 0;
+let bulletSprite = null;
+const glowSprites = () => C.glow > 0 && C.pixel === 1;
+// Margen para que quepa el brillo: shadowBlur 12 ≈ sigma 6 → ~3 sigma más el trazo.
+const glowPad = () => Math.ceil(C.glow * 1.5) + 4;
+// Canvas cuadrado de lado 2·half con el origen en el centro; paint() dibuja en ctx.
+function makeSprite(half, paint) {
+  const c = document.createElement("canvas");
+  c.width = c.height = half * 2;
+  const prev = ctx;
+  ctx = c.getContext("2d");
+  ctx.translate(half, half);
+  paint();
+  ctx = prev;
+  return c;
+}
 function applySkin(skin, mode) {
   const s = SKINS[skin] ? skin : "clasico";
   const m = mode === "claro" ? "claro" : "oscuro";
@@ -149,6 +168,8 @@ function applySkin(skin, mode) {
   lo.width = W / C.pixel;
   lo.height = H / C.pixel;
   toneCache = new Map();
+  skinGen++; // invalida los sprites con brillo de la skin anterior
+  bulletSprite = null;
   if (C.font === PIXEL && document.fonts)
     document.fonts.load(PIXEL.hud).catch(() => {});
 }
@@ -213,6 +234,23 @@ class Bullet {
     if (this.ttl <= 0) this.dead = true;
   }
   draw() {
+    if (glowSprites()) {
+      if (!bulletSprite)
+        bulletSprite = makeSprite(this.radius + glowPad(), () => {
+          ctx.fillStyle = C.bullet;
+          glow(C.bullet);
+          ctx.beginPath();
+          ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      const h = bulletSprite.width / 2;
+      ctx.drawImage(
+        bulletSprite,
+        Math.round(this.x) - h,
+        Math.round(this.y) - h,
+      );
+      return;
+    }
     ctx.save();
     ctx.fillStyle = C.bullet;
     glow(C.bullet);
@@ -265,10 +303,8 @@ class Asteroid {
       new Asteroid(this.x, this.y, this.size - 1),
     ];
   }
-  draw() {
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.rot);
+  // Contorno con su brillo, centrado en el origen y sin rotar.
+  trace() {
     ctx.strokeStyle = C.rock;
     glow(C.rock);
     ctx.lineWidth = 1.5 * C.line;
@@ -279,6 +315,26 @@ class Asteroid {
       ctx.lineTo(this.verts[i][0], this.verts[i][1]);
     ctx.closePath();
     ctx.stroke();
+  }
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rot);
+    if (glowSprites()) {
+      // Sprite propio de la roca (su polígono es único), rehecho al cambiar de skin.
+      // El brillo es simétrico, así que rotar el sprite equivale a rotar la figura.
+      if (!this.sprite || this.sprite.gen !== skinGen)
+        this.sprite = {
+          gen: skinGen,
+          img: makeSprite(Math.ceil(this.radius + 2) + glowPad(), () =>
+            this.trace(),
+          ),
+        };
+      const h = this.sprite.img.width / 2;
+      ctx.drawImage(this.sprite.img, -h, -h);
+    } else {
+      this.trace();
+    }
     ctx.restore();
   }
 }
@@ -724,22 +780,37 @@ function nearestTone(px) {
 function quantize() {
   const img = loCtx.getImageData(0, 0, lo.width, lo.height);
   const px = new Uint32Array(img.data.buffer);
+  // Casi todos los píxeles repiten el color del anterior (fondo): solo se consulta
+  // la caché cuando el color cambia.
+  let lastP = -1;
+  let lastT = 0;
   for (let i = 0; i < px.length; i++) {
     const p = px[i];
-    let t = toneCache.get(p);
-    if (t === undefined) {
-      t = nearestTone(p);
-      toneCache.set(p, t);
+    if (p !== lastP) {
+      lastP = p;
+      lastT = toneCache.get(p);
+      if (lastT === undefined) {
+        lastT = nearestTone(p);
+        toneCache.set(p, lastT);
+      }
     }
-    px[i] = t;
+    px[i] = lastT;
   }
   loCtx.putImageData(img, 0, 0);
 }
+// Las scanlines no se mueven: se pintan una vez por skin y se copian con drawImage.
+let scanLayer = null;
 function drawScanlines() {
-  ctx.save();
-  ctx.fillStyle = C.scan;
-  for (let y = 1; y < H; y += C.pixel) ctx.fillRect(0, y, W, 1);
-  ctx.restore();
+  if (!scanLayer || scanLayer.gen !== skinGen) {
+    const img = document.createElement("canvas");
+    img.width = W;
+    img.height = H;
+    const g = img.getContext("2d");
+    g.fillStyle = C.scan;
+    for (let y = 1; y < H; y += C.pixel) g.fillRect(0, y, W, 1);
+    scanLayer = { gen: skinGen, img };
+  }
+  ctx.drawImage(scanLayer.img, 0, 0);
 }
 function draw() {
   // Con C.pixel > 1 la escena se dibuja en el lienzo pequeño y se reescala sin suavizado.
