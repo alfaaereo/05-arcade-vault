@@ -36,6 +36,14 @@ La primera LABERINTO VORAZ (2026-10-21, formato antiguo de 3 juegos: `gloton`, `
 - B `contraflujo`: velocidad automática, carriles 3–4 en contramano (×3), nitro con Espacio (×2), sin vidas (choque −30 combustible), 10 tramos de 2 km, meta a 20 km; tráfico CIVIL, CONTRAMANO, KAMIKAZE; máx. 376.100.
 - Archivos: `specs/game-jam/autopista/01-juego-autopista-resistencia.md`, `specs/game-jam/autopista/02-juego-autopista-contraflujo.md`.
 
+### 2026-10-27 — DUELO DE CAÑONES
+
+- Juego: **DUELO DE CAÑONES** (`artilleria`) · VERSUS · yellow · portada nueva `cover-artilleria`. Es la sugerencia del game-planner (2026-10-21), usada con su id y título exactos por indicación de la tarea. Primer VERSUS y primer amarillo real.
+- Concepto: artillería por turnos contra un tanque CPU; ángulo y potencia, viento y terreno destructible (mapa de alturas de 800 columnas). Pasos fijos 1/120 s.
+- A `rondas` (recomendada): 8 rondas, terreno nuevo por ronda, un solo obús, viento que deriva, 10 obuses por tanque (empate si se agotan), IA con ruido decreciente por ronda; máx. 19.240.
+- B `asedio`: 10 enemigos (ARTILLERO, MORTERO, FRANCOTIRADOR, COLOSO) sobre terreno persistente, armas OBÚS/TRIPLE/PERFORANTE con munición, reloj de 12 s, viento nuevo cada turno, botón táctil ARMA (`KeyE`); cota 25.790.
+- Archivos: `specs/game-jam/artilleria/01-juego-artilleria-rondas.md`, `specs/game-jam/artilleria/02-juego-artilleria-asedio.md`.
+
 ## IDs usados
 
-- `gloton` (2026-10-22), `autopista` (2026-10-24). Reservado por el game-planner: `laberinto`.
+- `gloton` (2026-10-22), `autopista` (2026-10-24), `artilleria` (2026-10-27). Reservado por el game-planner: `laberinto`.
