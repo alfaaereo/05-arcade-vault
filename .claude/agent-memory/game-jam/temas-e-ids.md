@@ -36,6 +36,14 @@ La primera LABERINTO VORAZ (2026-10-21, formato antiguo de 3 juegos: `gloton`, `
 - B `contraflujo`: velocidad automática, carriles 3–4 en contramano (×3), nitro con Espacio (×2), sin vidas (choque −30 combustible), 10 tramos de 2 km, meta a 20 km; tráfico CIVIL, CONTRAMANO, KAMIKAZE; máx. 376.100.
 - Archivos: `specs/game-jam/autopista/01-juego-autopista-resistencia.md`, `specs/game-jam/autopista/02-juego-autopista-contraflujo.md`.
 
+### 2026-10-28 — DEFENSA ORBITAL
+
+- Juego: **DEFENSA ORBITAL** (`defensa`) · SHOOTER · yellow · portada nueva `cover-defensa`. Es la sugerencia del game-planner (2026-10-21), usada con su id y título exactos por indicación de la tarea.
+- Concepto: Missile-Command-like en 800×600 (HUD 36 px, suelo 52 px): 6 ciudades en `x = 130, 215, 300, 500, 585, 670`, 3 silos en `x = 40, 400, 760`; mira con ratón (alternativa flechas/WASD + Espacio); pasos fijos 1/120 s; controls táctil con cruceta + DISPARO.
+- A `oleadas` (recomendada): 12 oleadas, munición 10–12 por silo, MISIL, CARRO multicabeza, DRON bombardero; multiplicador ×1–×6, bonus por ciudades y munición; máx. 99.770.
+- B `cadena`: 8 sectores de 40 s, cargador de 6 cargas con recarga, ciudades de 2 de blindaje, cadena `20 × 2^d` (hasta 320), MISIL, RACIMO, ESQUIVADOR; máx. 203.360.
+- Archivos: `specs/game-jam/defensa/01-juego-defensa-oleadas.md`, `specs/game-jam/defensa/02-juego-defensa-cadena.md`.
+
 ## IDs usados
 
-- `gloton` (2026-10-22), `autopista` (2026-10-24). Reservado por el game-planner: `laberinto`.
+- `gloton` (2026-10-22), `autopista` (2026-10-24), `defensa` (2026-10-28). Reservado por el game-planner: `laberinto`.
