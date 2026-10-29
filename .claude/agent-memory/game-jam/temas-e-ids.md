@@ -36,6 +36,14 @@ La primera LABERINTO VORAZ (2026-10-21, formato antiguo de 3 juegos: `gloton`, `
 - B `contraflujo`: velocidad automática, carriles 3–4 en contramano (×3), nitro con Espacio (×2), sin vidas (choque −30 combustible), 10 tramos de 2 km, meta a 20 km; tráfico CIVIL, CONTRAMANO, KAMIKAZE; máx. 376.100.
 - Archivos: `specs/game-jam/autopista/01-juego-autopista-resistencia.md`, `specs/game-jam/autopista/02-juego-autopista-contraflujo.md`.
 
+### 2026-10-29 — SALTO CÓSMICO
+
+- Juego: **SALTO CÓSMICO** (`salto`) · ARCADE · yellow · portada nueva `cover-salto`. Es la sugerencia del game-planner (2026-10-21), usada con su id y título exactos por indicación de la tarea. Primer juego amarillo real.
+- Concepto: saltador vertical en una columna de 480 px (HUD en paneles de 160 px), salto automático al aterrizar, control solo horizontal con envoltura; plataformas estática, móvil, frágil y resorte. Pasos fijos 1/120 s, aterrizaje por barrido.
+- A `ascenso` (recomendada): 10 zonas de 500 m, cima a 5.000 m, 3 vidas con balsa de rescate, meteoritos, estrellas `50 × zona`, metro vale `zona`; máx. 52.209.
+- B `vacio`: agujero negro que sube a `40 + 0,9 × t` px/s, una vida, impulso aéreo con Espacio, racha de aterrizajes ascendentes ×8 y AL BORDE ×3, núcleos que hacen retroceder el vacío, portal a 4.000 m; máx. 147.940.
+- Archivos: `specs/game-jam/salto/01-juego-salto-ascenso.md`, `specs/game-jam/salto/02-juego-salto-vacio.md`.
+
 ## IDs usados
 
-- `gloton` (2026-10-22), `autopista` (2026-10-24). Reservado por el game-planner: `laberinto`.
+- `gloton` (2026-10-22), `autopista` (2026-10-24), `salto` (2026-10-29). Reservado por el game-planner: `laberinto`.
