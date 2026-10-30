@@ -36,6 +36,14 @@ La primera LABERINTO VORAZ (2026-10-21, formato antiguo de 3 juegos: `gloton`, `
 - B `contraflujo`: velocidad automática, carriles 3–4 en contramano (×3), nitro con Espacio (×2), sin vidas (choque −30 combustible), 10 tramos de 2 km, meta a 20 km; tráfico CIVIL, CONTRAMANO, KAMIKAZE; máx. 376.100.
 - Archivos: `specs/game-jam/autopista/01-juego-autopista-resistencia.md`, `specs/game-jam/autopista/02-juego-autopista-contraflujo.md`.
 
+### 2026-10-30 — ALUNIZAJE
+
+- Juego: **ALUNIZAJE** (`alunizaje`) · ARCADE · green · portada nueva `cover-alunizaje`. Es la sugerencia del game-planner (2026-10-21), usada con su id y título exactos por indicación de la tarea.
+- Concepto: aterrizador vectorial de inercia (gira con ← →, empuja con ↑/Espacio) sobre terreno lunar con semilla fija, balizas con multiplicador y combustible limitado. Pasos fijos 1/120 s.
+- A `misiones` (recomendada): 6 zonas, 3 módulos, tanque por zona, balizas ×2/×3/×5, viento desde la zona 4, toque perfecto; máx. 36.820.
+- B `ruta`: 5 sectores × 3 saltos con despegue, un módulo sin vidas, tanque global 700 con repostaje, reloj de oxígeno por salto, racha ×1–×4, balizas ×1/×2/×4 y objetivo marcado; máx. 355.000.
+- Archivos: `specs/game-jam/alunizaje/01-juego-alunizaje-misiones.md`, `specs/game-jam/alunizaje/02-juego-alunizaje-ruta.md`.
+
 ## IDs usados
 
-- `gloton` (2026-10-22), `autopista` (2026-10-24). Reservado por el game-planner: `laberinto`.
+- `gloton` (2026-10-22), `autopista` (2026-10-24), `alunizaje` (2026-10-30). Reservado por el game-planner: `laberinto`.
